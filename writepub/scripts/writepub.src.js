@@ -15,6 +15,13 @@ $.extend(w, {
             {title: 'zoom', id: 'zoom'},
             {title: 'download', id: 'download'},
             {title: 'about', id: 'about'}
+        ],
+        frontMatter: [
+            {title: 'introduction', id: 'introduction'},
+            {title: 'cover', id: 'cover'},
+            {title: 'title page', id: 'title page'},
+            {title: 'copyright page', id: 'copyright page'},
+            {title: 'author\'s preface', id: 'author\'s preface'}
         ]
     },
     book: {
@@ -89,6 +96,7 @@ $.extend(w, {ui: {
         container.html(w.ui.initTemplate);
         w.ui.updateHeader();
         w.ui.toolbar(w.meta.toolbar);
+        w.ui.frontMatter(w.meta.frontMatter);
     },
     updateHeader: function() {
         $('#header h1').html(w.book.meta.title);
@@ -101,6 +109,10 @@ $.extend(w, {ui: {
     toolbar: function(tools) {
         if (!w.ui.inited) { return false; }
         w.ui.fillList($('#toolbar'), tools);
+    },
+    frontMatter: function(pages) {
+        if (!w.ui.inited) { return false; }
+        w.ui.fillList($('#toc'), pages);
     },
     fillList: function(list, items) {
         var html = '';

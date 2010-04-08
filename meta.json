@@ -1,4 +1,5 @@
 {
     "title":"一本新書",
-    "desc":"測試中"
+    "desc":"測試中",
+    "mainPage": "http://blog.othree.net"
 }

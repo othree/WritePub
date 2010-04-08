@@ -1,4 +1,4 @@
-/*global writepub _ saveFile loadFile manualConvertUTF8ToUnicode mozConvertUTF8ToUnicode netscape 
+/*global writepub _ tinyMCE saveFile loadFile manualConvertUTF8ToUnicode mozConvertUTF8ToUnicode netscape 
          Components convertUnicodeToHtmlEntities mozConvertUnicodeToUTF8 ieCopyFile mozillaSaveFile
          ieSaveFile javaSaveFile mozillaLoadFile ieLoadFile javaLoadFile ActiveXObject */
 
@@ -8,6 +8,14 @@ var w = {};
 
 $.extend(w, {
     options: {
+        defaults: {
+            crumbs: [
+                {title: 'main page', id: 'main page'},
+                {title: 'introduction', id: 'introduction'}
+            ],
+            contentsPath: 'contents',
+            fileExt: 'html'
+        }
     },
     meta: {
         toolbar: [
@@ -33,16 +41,55 @@ $.extend(w, {
 });
 
 $.extend(w, {
-    init: function () {
+    init: function (options) {
+        if (w.inited) { return false; }
         w.inited = true;
+        w.setOptions(options);
         w.options.mode = document.location.protocol == 'file:' ? 'w' : 'r';
         w.options.path = document.location.pathname.replace(/[^\/]*$/, '');
 
         w.loadMeta();
         w.ui.init();
-        w.load('introduction');
+        w.presentId = w.getInitId();
+        w.load(w.presentId);
     },
-    load: function () {
+    setOptions: function (options) {
+        var i;
+        for (i in w.options.defaults) {
+            w.options[i] = w.options.defaults[i];
+        }
+        for (i in options) {
+            w.options[i] = options[i];
+        }
+    },
+    getInitId: function () {
+        return document.location.hash || 'introduction';
+    },
+    safeId: function (id) {
+        return id.replace(/[^\w\d-_%]/g, '');
+    },
+    idExist: function (id) {
+        id = w.safeId(id);
+        if (id.match(/^ch\d(-\d)*$/)) {
+            return id;
+        } else {
+           for ( var i = 0, len = w.meta.frontMatter.length; i < len; i++) {
+                if (w.safeId(w.meta.frontMatter[i].title) == id) { return id; }
+           }
+           return false;
+        }
+    },
+    load: function (id) {
+        id = w.idExist(w.safeId(id));
+        if (id !== false) {
+            w.setContent(w.loadContent(id));
+        }
+    },
+    save: function (id) {
+        id = w.idExist(w.safeId(id));
+        if (id !== false) {
+            w.saveContent(id, w.getContent(id));
+        }
     },
     loadMeta: function () {
         var meta = w.loadFile('meta.json');
@@ -52,16 +99,33 @@ $.extend(w, {
         }
     },
     saveMeta: function () {
-        var meta = w.book.meta;
-        var path = 'meta.json';
+        var meta = w.book.meta,
+            path = 'meta.json';
         meta = JSON.stringify(meta);
         w.saveFile(path, meta);
     },
     loadTOC: function () {
     },
-    loadContent: function () {
+    loadContent: function (id) {
+        var filePath = w.options.contentsPath + '/' + id + '.' + w.options.fileExt,
+            content = w.loadFile(filePath);
+        content = (content === false)? '['+_('No contents')+']' : content ;
+        return content;
     },
-    setContent: function () {
+    saveContent: function (id, content) {
+        var filePath = w.options.contentsPath + '/' + id + '.' + w.options.fileExt;
+        return w.saveFile(filePath, content);
+    },
+    setContent: function (content) {
+        if (typeof content == 'string') {
+            w.editor.setContent(content);
+            return true;
+        } else {
+            return false;
+        }
+    },
+    getContent: function (id) {
+        return w.editor.getContent();
     },
     saveFile: function (filePath, content) {
         var realPath = document.location.protocol + '//' + document.location.host + w.options.path + filePath;
@@ -79,14 +143,56 @@ $.extend(w, {
             return ajax.status == 200 ? ajax.responseText : false ;
         }
     },
-    loadEditor: function () {
-    },
     inited: false
 });
 
+$.extend(w, {editor: {
+    load: function () {
+        if (w.editor.inited) { return false; }
+        $('#editor').tinymce({
+            script_url : 'writepub/vendor/tinymce/jscripts/tiny_mce/tiny_mce.js',
+            // General options
+            theme: "advanced",
+            width: "100%",
+            height: "475",
+            plugins : "safari,spellchecker,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
+
+            // Theme options
+            theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+            theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
+            theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+            theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage",
+            theme_advanced_toolbar_location : "top",
+            theme_advanced_toolbar_align : "left",
+            theme_advanced_statusbar_location : "bottom",
+            theme_advanced_resizing : false,
+            oninit: function (inst) {
+                w.editor._instance = inst;
+                w.editor.inited = true;
+            }
+        });
+    },
+    setContent: function (content) {
+        if (typeof content != 'string') { return false; }
+        if (w.editor.inited) {
+            w.editor._instance.setContent(content);
+        } else {
+            setTimeout(function () {
+                w.editor.setContent(content);
+            }, 100);
+        }
+    },
+    getContent: function () {
+        if (!w.editor.inited) { return false; }
+        return w.editor._instance.getContent();
+    },
+    inited: false,
+    _instance: null
+}});
+
 $.extend(w, {ui: {
     init: function() {
-        if (!w.inited) { return false; }
+        if (!w.inited || w.ui.inited) { return false; }
         w.ui.inited = true;
         var container = $('#container');
         if (container.length === 0) {
@@ -97,6 +203,8 @@ $.extend(w, {ui: {
         w.ui.updateHeader();
         w.ui.toolbar(w.meta.toolbar);
         w.ui.frontMatter(w.meta.frontMatter);
+        w.ui.breadcrumbs(w.options.defaults.crumbs);
+        w.editor.load();
     },
     updateHeader: function() {
         $('#header h1').html(w.book.meta.title);
@@ -113,11 +221,24 @@ $.extend(w, {ui: {
     frontMatter: function(pages) {
         if (!w.ui.inited) { return false; }
         w.ui.fillList($('#toc'), pages);
+        $('#toc').click(function (e) {
+            var uri = $(e.target).attr('href'),
+                i = uri.indexOf('#');
+            if (i != -1) {
+                w.load(uri.substring(i+1));
+                e.stopPropagation();
+                e.preventDefault();
+                return false;
+            }
+        });
     },
     fillList: function(list, items) {
-        var html = '';
+        var html = '', id;
         for (var i = 0, len = items.length; i < len; i++) {
-            html += '<li><a href="#'+items[i].id+'">'+_(items[i].title)+'</a></li>';
+            id = w.idExist(w.safeId(items[i].id));
+            if (id !== false) {
+                html += '<li><a href="#'+id+'">'+_(items[i].title)+'</a></li>';
+            }
         }
         list.html(html);
     },

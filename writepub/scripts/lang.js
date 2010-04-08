@@ -11,5 +11,7 @@ lang = {
     'title page': '書名頁',
     'copyright page': '版權頁',
     'author\'s preface': '自序',
+    'main page': '主頁',
+    'No contents': '尚無內容',
     '': ''
 };

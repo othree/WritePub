@@ -13,7 +13,7 @@ $.extend(w, {
                 {title: 'main page', id: 'main page'},
                 {title: 'introduction', id: 'introduction'}
             ],
-            contentsPath: 'contents',
+            booksPath: 'books',
             fileExt: 'html'
         }
     },
@@ -35,7 +35,10 @@ $.extend(w, {
     book: {
         meta: {
             title: _('New Book'),
-            desc: _('Book Description')
+            desc: _('Book Description'),
+            toc: [
+                {title: 'Chapter 1', id: 'ch1'}
+            ]
         }
     }
 });
@@ -92,28 +95,28 @@ $.extend(w, {
         }
     },
     loadMeta: function () {
-        var meta = w.loadFile('meta.json');
+        var filePath = w.options.booksPath + '/0/meta.json',
+            meta = w.loadFile(filePath);
         if (meta !== false) {
             meta = JSON.parse(meta);
             $.extend(w.book.meta, meta);
         }
     },
     saveMeta: function () {
-        var meta = w.book.meta,
-            path = 'meta.json';
-        meta = JSON.stringify(meta);
-        w.saveFile(path, meta);
+        var meta = JSON.stringify(w.book.meta),
+            filePath = w.options.booksPath + '/0/meta.json';
+        w.saveFile(filePath, meta);
     },
     loadTOC: function () {
     },
     loadContent: function (id) {
-        var filePath = w.options.contentsPath + '/' + id + '.' + w.options.fileExt,
+        var filePath = w.options.booksPath + '/0/' + id + '.' + w.options.fileExt,
             content = w.loadFile(filePath);
         content = (content === false)? '['+_('No contents')+']' : content ;
         return content;
     },
     saveContent: function (id, content) {
-        var filePath = w.options.contentsPath + '/' + id + '.' + w.options.fileExt;
+        var filePath = w.options.booksPath + '/0/' + id + '.' + w.options.fileExt;
         return w.saveFile(filePath, content);
     },
     setContent: function (content) {

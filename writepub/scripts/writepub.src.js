@@ -35,10 +35,14 @@ $.extend(w, {
     book: {
         meta: {
             title: _('New Book'),
-            desc: _('Book Description'),
-            toc: [
-                {title: 'Chapter 1', id: 'ch1'}
-            ]
+            creator: _('Hancorck'),
+            description: _('Book Description'),
+            publisher: '',
+            language: '',
+            rights: '',
+            toc: {
+                ch1: {title: 'Chapter 1', id: 'ch1'}
+            }
         }
     }
 });
@@ -73,7 +77,7 @@ $.extend(w, {
     },
     idExist: function (id) {
         id = w.safeId(id);
-        if (id.match(/^ch\d(-\d)*$/)) {
+        if (id.match(/^ch\d(-\d)*$/) || id.indexOf('http') === 0) {
             return id;
         } else {
            for ( var i = 0, len = w.meta.frontMatter.length; i < len; i++) {
@@ -82,10 +86,21 @@ $.extend(w, {
            return false;
         }
     },
+    findTitle: function (collection, id) {
+        for ( var i = 0, len = collection.length; i < len; i++) {
+            if (w.safeId(collection[i].id) == id) { return collection[i].title; }
+        }
+        return false;
+    },
     load: function (id) {
         id = w.idExist(w.safeId(id));
         if (id !== false) {
             w.setContent(w.loadContent(id));
+            var crumbs = [
+                {title: 'main page', id: w.book.meta.mainPage},
+                {title: w.findTitle(w.meta.frontMatter, id), id: id}
+            ];
+            w.ui.breadcrumbs(crumbs);
         }
     },
     save: function (id) {
@@ -212,9 +227,11 @@ $.extend(w, {ui: {
     updateHeader: function() {
         $('#header h1').html(w.book.meta.title);
         $('#desc').html(w.book.meta.desc);
+        $('#creator').html(w.book.meta.creator);
     },
     breadcrumbs: function(crumbs) {
         if (!w.ui.inited) { return false; }
+        $('#breadcrumbs').empty();
         w.ui.fillList($('#breadcrumbs'), crumbs);
     },
     toolbar: function(tools) {
@@ -236,6 +253,7 @@ $.extend(w, {ui: {
         });
     },
     fillList: function(list, items) {
+        if (!w.ui.inited) { return false; }
         var html = '', id;
         for (var i = 0, len = items.length; i < len; i++) {
             id = w.idExist(w.safeId(items[i].id));
@@ -251,7 +269,7 @@ $.extend(w, {ui: {
     initTemplate: '' +
         '<div id="header">' +
         '    <h1></h1>' +
-        '    <p id="desc"></p>' +
+        '    <p><span id="desc"></span> by <span id="creator"></span></p>' +
         '</div>' +
         '<div id="nav">' +
         '    <ol id="breadcrumbs">' +

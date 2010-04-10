@@ -15,7 +15,7 @@ h1 {
     font-weight:bold;
     display: inline;
 }
-#desc {
+#header p {
     display: inline;
 }
 #nav {

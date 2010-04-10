@@ -1,6 +1,7 @@
 /*global lang*/
 
 lang = {
+    'back to main': '回到主頁',
     'goto content': '直接進入內文',
     'read': '閱讀',
     'zoom': '縮放',

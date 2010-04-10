@@ -87,6 +87,19 @@ $.extend(w, {
            return false;
         }
     },
+    genId: function (uri) {
+        var start = uri.lastIndexOf('/')+1,
+            end = uri.lastIndexOf('.'),
+            id = uri.substring(start, end);
+        return w.idExist(w.safeId(id));
+    },
+    genFilePath: function (filename) {
+        if (filename.indexOf('.') === -1) {
+            return w.options.booksPath + '/' + w.book.meta.id + '/' + filename + '.' + w.options.fileExt;
+        } else {
+            return w.options.booksPath + '/' + w.book.meta.id + '/' + filename;
+        }
+    },
     load: function (id) {
         id = w.idExist(w.safeId(id));
         if (id !== false) {
@@ -94,7 +107,11 @@ $.extend(w, {
             var crumbs = {
                 mainpage: {title: 'main page', value: w.book.meta.mainPage}
             };
-            crumbs[id] = {title: w.meta.frontMatter[id].title};
+            if (id.match(/^ch\d+(-\d+)*$/)) {
+                crumbs[id] = {title: w.book.meta.toc[id].title};
+            } else {
+                crumbs[id] = {title: w.meta.frontMatter[id].title};
+            }
             w.ui.breadcrumbs(crumbs);
         }
     },
@@ -105,7 +122,7 @@ $.extend(w, {
         }
     },
     loadMeta: function () {
-        var filePath = w.options.booksPath + '/'+w.book.meta.id+'/meta.json',
+        var filePath = w.genFilePath('meta.json'),
             meta = w.loadFile(filePath);
         if (meta !== false) {
             meta = JSON.parse(meta);
@@ -114,17 +131,17 @@ $.extend(w, {
     },
     saveMeta: function () {
         var meta = JSON.stringify(w.book.meta),
-            filePath = w.options.booksPath + '/'+w.book.meta.id+'/meta.json';
+            filePath = w.genFilePath('meta.json');
         w.saveFile(filePath, meta);
     },
     loadContent: function (id) {
-        var filePath = w.options.booksPath + '/0/' + id + '.' + w.options.fileExt,
+        var filePath = w.genFilePath(id),
             content = w.loadFile(filePath);
         content = (content === false)? '['+_('No contents')+']' : content ;
         return content;
     },
     saveContent: function (id, content) {
-        var filePath = w.options.booksPath + '/0/' + id + '.' + w.options.fileExt;
+        var filePath = w.genFilePath(id);
         return w.saveFile(filePath, content);
     },
     setContent: function (content) {
@@ -213,13 +230,17 @@ $.extend(w, {ui: {
         container.html(w.ui.initTemplate);
         w.ui.updateHeader();
         w.ui.toolbar(w.meta.toolbar);
-        w.ui.frontMatter(w.meta.frontMatter);
+        w.ui.frontMatter();
         w.ui.breadcrumbs(w.options.defaults.crumbs);
         w.editor.load();
+
+        w.ui.tocEvent();
+        w.ui.goContentEvent();
+        $('#backto-main').parent().hide();
     },
     updateHeader: function() {
         $('#header h1').html(w.book.meta.title);
-        $('#desc').html(w.book.meta.desc);
+        $('#description').html(w.book.meta.description);
         $('#creator').html(w.book.meta.creator);
     },
     breadcrumbs: function(crumbs) {
@@ -231,18 +252,45 @@ $.extend(w, {ui: {
         if (!w.ui.inited) { return false; }
         w.ui.fillList($('#toolbar'), tools);
     },
-    frontMatter: function(pages) {
+    frontMatter: function() {
         if (!w.ui.inited) { return false; }
-        w.ui.fillList($('#toc'), pages);
+        w.ui.fillList($('#toc'), w.meta.frontMatter);
+    },
+    toc: function() {
+        if (!w.ui.inited) { return false; }
+        w.ui.fillList($('#toc'), w.book.meta.toc);
+    },
+    tocEvent: function() {
         $('#toc').click(function (e) {
             var uri = $(e.target).attr('href'),
-                i = uri.indexOf('#');
-            if (i != -1) {
-                w.load(uri.substring(i+1));
+                id = w.genId(uri);
+            if (id !== false) {
+                w.load(id);
                 e.stopPropagation();
                 e.preventDefault();
                 return false;
             }
+        });
+    },
+    goContentEvent: function () {
+        if (!w.ui.inited) { return false; }
+        $('#goto-content').click(function (e) {
+            w.ui.toc();
+            $('#goto-content').parent().hide();
+            $('#backto-main').parent().show();
+            w.load('ch1');
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+        });
+        $('#backto-main').click(function (e) {
+            w.ui.frontMatter();
+            $('#goto-content').parent().show();
+            $('#backto-main').parent().hide();
+            w.load('introduction');
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
         });
     },
     fillList: function(list, items) {
@@ -251,7 +299,7 @@ $.extend(w, {ui: {
         for (var id in items) {
             id = w.idExist(w.safeId(id));
             if (id !== false) {
-                html += '<li><a href="#'+id+'">'+_(items[id].title)+'</a></li>';
+                html += '<li><a href="'+w.genFilePath(id)+'">'+_(items[id].title)+'</a></li>';
             }
         }
         list.html(html);
@@ -262,22 +310,18 @@ $.extend(w, {ui: {
     initTemplate: '' +
         '<div id="header">' +
         '    <h1></h1>' +
-        '    <p><span id="desc"></span> by <span id="creator"></span></p>' +
+        '    <p><span id="description"></span> by <span id="creator"></span></p>' +
         '</div>' +
         '<div id="nav">' +
-        '    <ol id="breadcrumbs">' +
-        '    </ol>' +
-        '    <ul id="toolbar">' +
-        '    </ul>' +
+        '    <ol id="breadcrumbs"></ol>' +
+        '    <ul id="toolbar"></ul>' +
         '    <div id="progress"></div>' +
         '</div>' +
         '<div id="main">' +
         '    <div id="menu">' +
-        '        <ol id="toc">' +
-        '        </ol>' +
-        '        <p>' +
-        '            <a id="goto-content" href="">'+_('goto content')+'</a>' +
-        '        </p>' +
+        '        <p><a id="backto-main" href="">'+_('back to main')+'</a></p>' +
+        '        <ol id="toc"></ol>' +
+        '        <p><a id="goto-content" href="">'+_('goto content')+'</a></p>' +
         '    </div>' +
         '    <div id="content">' +
         '        <textarea id="editor"></textarea>' +

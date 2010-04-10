@@ -75,6 +75,7 @@ h1 {
     list-style-type: disc;
     margin-left: 1.5em;
 }
+#backto-main,
 #goto-content {
     display:block;
     margin: 1em 4px 0;
@@ -82,6 +83,7 @@ h1 {
     padding: 4px;
     border: 1px solid black;
 }
+#backto-main:hover,
 #goto-content:hover {
     background: #999;
     color:#fff;

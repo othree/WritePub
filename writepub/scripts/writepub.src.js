@@ -9,31 +9,32 @@ var w = {};
 $.extend(w, {
     options: {
         defaults: {
-            crumbs: [
-                {title: 'main page', id: 'main page'},
-                {title: 'introduction', id: 'introduction'}
-            ],
+            crumbs: {
+                mainpage: {title: 'main page'},
+                introduction: {title: 'introduction'}
+            },
             booksPath: 'books',
             fileExt: 'html'
         }
     },
     meta: {
-        toolbar: [
-            {title: 'read', id: 'read'},
-            {title: 'zoom', id: 'zoom'},
-            {title: 'download', id: 'download'},
-            {title: 'about', id: 'about'}
-        ],
-        frontMatter: [
-            {title: 'introduction', id: 'introduction'},
-            {title: 'cover', id: 'cover'},
-            {title: 'title page', id: 'title page'},
-            {title: 'copyright page', id: 'copyright page'},
-            {title: 'author\'s preface', id: 'author\'s preface'}
-        ]
+        toolbar: {
+            read: {title: 'read'},
+            zoom: {title: 'zoom'},
+            download: {title: 'download'},
+            about: {title: 'about'}
+        },
+        frontMatter: {
+            introduction: {title: 'introduction'},
+            cover: {title: 'cover'},
+            titlepage: {title: 'title page'},
+            copyrightpage: {title: 'copyright page'},
+            authorspreface: {title: 'author\'s preface'}
+        }
     },
     book: {
         meta: {
+            id: 0,
             title: _('New Book'),
             creator: _('Hancorck'),
             description: _('Book Description'),
@@ -41,7 +42,7 @@ $.extend(w, {
             language: '',
             rights: '',
             toc: {
-                ch1: {title: 'Chapter 1', id: 'ch1'}
+                ch1: {title: 'Chapter 1'}
             }
         }
     }
@@ -77,29 +78,23 @@ $.extend(w, {
     },
     idExist: function (id) {
         id = w.safeId(id);
-        if (id.match(/^ch\d(-\d)*$/) || id.indexOf('http') === 0) {
+        if (id.match(/^ch\d(-\d)*$/) || id.indexOf('http') === 0 || id == 'mainpage') {
             return id;
         } else {
-           for ( var i = 0, len = w.meta.frontMatter.length; i < len; i++) {
-                if (w.safeId(w.meta.frontMatter[i].title) == id) { return id; }
+           for ( var eid in w.meta.frontMatter) {
+                if (eid == id) { return id; }
            }
            return false;
         }
-    },
-    findTitle: function (collection, id) {
-        for ( var i = 0, len = collection.length; i < len; i++) {
-            if (w.safeId(collection[i].id) == id) { return collection[i].title; }
-        }
-        return false;
     },
     load: function (id) {
         id = w.idExist(w.safeId(id));
         if (id !== false) {
             w.setContent(w.loadContent(id));
-            var crumbs = [
-                {title: 'main page', id: w.book.meta.mainPage},
-                {title: w.findTitle(w.meta.frontMatter, id), id: id}
-            ];
+            var crumbs = {
+                mainpage: {title: 'main page', value: w.book.meta.mainPage}
+            };
+            crumbs[id] = {title: w.meta.frontMatter[id].title};
             w.ui.breadcrumbs(crumbs);
         }
     },
@@ -110,7 +105,7 @@ $.extend(w, {
         }
     },
     loadMeta: function () {
-        var filePath = w.options.booksPath + '/0/meta.json',
+        var filePath = w.options.booksPath + '/'+w.book.meta.id+'/meta.json',
             meta = w.loadFile(filePath);
         if (meta !== false) {
             meta = JSON.parse(meta);
@@ -119,10 +114,8 @@ $.extend(w, {
     },
     saveMeta: function () {
         var meta = JSON.stringify(w.book.meta),
-            filePath = w.options.booksPath + '/0/meta.json';
+            filePath = w.options.booksPath + '/'+w.book.meta.id+'/meta.json';
         w.saveFile(filePath, meta);
-    },
-    loadTOC: function () {
     },
     loadContent: function (id) {
         var filePath = w.options.booksPath + '/0/' + id + '.' + w.options.fileExt,
@@ -254,11 +247,11 @@ $.extend(w, {ui: {
     },
     fillList: function(list, items) {
         if (!w.ui.inited) { return false; }
-        var html = '', id;
-        for (var i = 0, len = items.length; i < len; i++) {
-            id = w.idExist(w.safeId(items[i].id));
+        var html = '';
+        for (var id in items) {
+            id = w.idExist(w.safeId(id));
             if (id !== false) {
-                html += '<li><a href="#'+id+'">'+_(items[i].title)+'</a></li>';
+                html += '<li><a href="#'+id+'">'+_(items[id].title)+'</a></li>';
             }
         }
         list.html(html);

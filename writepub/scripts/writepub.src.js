@@ -111,13 +111,14 @@ $.extend(w, {
                 crumbs[id] = {title: w.meta.frontMatter[id].title};
             }
             w.ui.breadcrumbs(crumbs);
+            w.meta.id = id;
         }
     },
     save: function (id) {
         id = w.idExist(w.safeId(id));
         if (id !== false) {
-            w.saveContent(id, w.getContent(id));
-        }
+            return w.saveContent(id, w.getContent(id));
+        } else { return false; }
     },
     loadMeta: function () {
         var filePath = w.genFilePath('meta.json'),
@@ -154,20 +155,24 @@ $.extend(w, {
         return w.editor.getContent();
     },
     saveFile: function (filePath, content) {
-        var realPath = document.location.protocol + '//' + document.location.host + w.options.path + filePath;
-        return w.options.mode == 'w' ? saveFile(filePath, content) : false;
+        var realPath = w.options.path.substring(1) + filePath;
+        realPath = realPath.replace(/\//g, '\\');
+        return w.options.mode == 'w' ? saveFile(realPath, content) : false;
     },
     loadFile: function (filePath) {
-        var realPath = document.location.protocol + '//' + document.location.host + w.options.path + filePath;
-        if (w.options.mode == 'w') {
-            return loadFile(filePath);
-        } else {
+        var realPath;
+        /* if (w.options.mode == 'w') {
+            realPath = w.options.path.substring(1) + filePath;
+            realPath = realPath.replace(/\//g, '\\');
+            return loadFile(realPath);
+        } else { */
+            realPath = document.location.protocol + '//' + document.location.host + w.options.path + filePath;
             var ajax = $.ajax({
                 url: realPath,
                 async: false
             });
-            return ajax.status == 200 ? ajax.responseText : false ;
-        }
+            return ajax.status == 200 || ajax.status === 0 ? ajax.responseText : false ;
+        // }
     },
     inited: false
 });
@@ -180,7 +185,7 @@ $.extend(w, {editor: {
             // General options
             theme: "advanced",
             width: "100%",
-            height: "475",
+            height: "450",
             plugins : "safari,spellchecker,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
 
             // Theme options
@@ -197,6 +202,16 @@ $.extend(w, {editor: {
                 w.editor.inited = true;
             }
         });
+        var save = $('<button id="save">Save</button>').click(function () {
+            var id = w.meta.id;
+            if (id) {
+                var done = w.save(id);
+                if (done) {
+                    w.ui.doneSave(id);
+                }
+            }
+        });
+        $('#editor').after( save );
     },
     setContent: function (content) {
         if (typeof content != 'string') { return false; }
@@ -301,6 +316,9 @@ $.extend(w, {ui: {
             }
         }
         list.html(html);
+    },
+    doneSave: function(id) {
+        alert(id + ' saved !');
     },
     getBody: function() {
         return $('body');

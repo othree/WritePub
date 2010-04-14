@@ -1,6 +1,4 @@
-/*global writepub _ tinyMCE saveFile loadFile manualConvertUTF8ToUnicode mozConvertUTF8ToUnicode netscape 
-         Components convertUnicodeToHtmlEntities mozConvertUnicodeToUTF8 ieCopyFile mozillaSaveFile
-         ieSaveFile javaSaveFile mozillaLoadFile ieLoadFile javaLoadFile ActiveXObject */
+/*global writepub _ tinyMCE saveFile loadFile */
 
 (function () {
 

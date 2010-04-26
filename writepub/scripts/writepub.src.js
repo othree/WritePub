@@ -231,6 +231,67 @@ $.extend(w, {editor: {
     _instance: null
 }});
 
+$.extend(w, {inplace: {
+    init: function () {
+        if (!w.inited || w.inplace.inited) { return false; }
+        w.inplace.inited = true;
+        var inplace = $('#inplace');
+        if (inplace.length === 0) {
+            $('body').append($(w.inplace.template));
+            inplace = $('#inplace');
+        }
+        inplace.find('form').submit(function (e) {
+            if ($.isFunction(w.inplace.callback)) { w.inplace.callback.apply(this, arguments); }
+            w.inplace.callback = null;
+            w.inplace.hide();
+            return false;
+        });
+        w.inplace.editor = inplace;
+    },
+    show: function (target, callback) {
+        var coord = w.inplace.getCoord(target),
+            offset = {
+                top: coord.top,
+                left: coord.left
+            },
+            size = {
+                width: coord.width,
+                height: coord.height
+            };
+        w.inplace.editor.offset(offset).
+            find('#inplace-input').width(size.width).height(size.height).
+            end().show();
+        w.inplace.callback = callback;
+    },
+    hide: function () {
+        w.inplace.editor.hide();
+    },
+    getCoord: function (target) {
+        var offset = $(target).offset();
+        return {
+            top: offset.top,
+            left: offset.left,
+            width: $(target).width(),
+            height: $(target).height()
+        };
+    },
+    setCoord: function (target, coord) {
+        var newCoord = $(target).offset();
+        if (coord.top) { newCoord.top = coord.top; }
+        if (coord.left) { newCoord.left = coord.left; }
+        $(target).offset(newCoord);
+        if (coord.width) { $(target).width(coord.width); }
+        if (coord.height) { $(target).height(coord.height); }
+    },
+    template: '' +
+        '<div id="inplace" style="display: none;">' +
+        '    <form id="implace-form">' +
+        '        <input id="inplace-input">' +
+        '        <input id="inplace-submit" type="submit">' +
+        '    </form>' +
+        '</div>'
+}});
+
 $.extend(w, {ui: {
     init: function() {
         if (!w.inited || w.ui.inited) { return false; }

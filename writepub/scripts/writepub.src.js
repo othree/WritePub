@@ -246,9 +246,15 @@ $.extend(w, {inplace: {
             w.inplace.hide();
             return false;
         });
+        inplace.find('#inplace-cancel').click(function (e) {
+            w.inplace.callback = null;
+            w.inplace.hide();
+            return false;
+        });
         w.inplace.editor = inplace;
     },
-    show: function (target, callback) {
+    show: function (target, value, callback) {
+        if (!w.inited || !w.inplace.inited) { return false; }
         var coord = w.inplace.getCoord(target),
             offset = {
                 top: coord.top,
@@ -258,15 +264,18 @@ $.extend(w, {inplace: {
                 width: coord.width,
                 height: coord.height
             };
-        w.inplace.editor.offset(offset).
-            find('#inplace-input').width(size.width).height(size.height).
-            end().show();
+        w.inplace.setCoord(w.inplace.editor, offset);
+        w.inplace.setCoord(w.inplace.editor.find('#inplace-input'), size);
+        w.inplace.editor.find('#inplace-input').val(value);
+        w.inplace.editor.show();
         w.inplace.callback = callback;
     },
     hide: function () {
+        if (!w.inited || !w.inplace.inited) { return false; }
         w.inplace.editor.hide();
     },
     getCoord: function (target) {
+        if (!w.inited || !w.inplace.inited) { return false; }
         var offset = $(target).offset();
         return {
             top: offset.top,
@@ -276,18 +285,21 @@ $.extend(w, {inplace: {
         };
     },
     setCoord: function (target, coord) {
+        if (!w.inited || !w.inplace.inited) { return false; }
         var newCoord = $(target).offset();
         if (coord.top) { newCoord.top = coord.top; }
         if (coord.left) { newCoord.left = coord.left; }
         $(target).offset(newCoord);
-        if (coord.width) { $(target).width(coord.width); }
+        if (coord.width) { $(target).width(coord.width+4); }
         if (coord.height) { $(target).height(coord.height); }
     },
+    editor: null,
     template: '' +
-        '<div id="inplace" style="display: none;">' +
-        '    <form id="implace-form">' +
-        '        <input id="inplace-input">' +
-        '        <input id="inplace-submit" type="submit">' +
+        '<div id="inplace" style="display: none; position: absolute;">' +
+        '    <form id="inplace-form">' +
+        '        <input id="inplace-input"><br />' +
+        '        <input id="inplace-submit" type="submit" value="GO">' +
+        '        <a href="#cancel" id="inplace-cancel">Cancel</a>' +
         '    </form>' +
         '</div>'
 }});
@@ -307,6 +319,8 @@ $.extend(w, {ui: {
         w.ui.frontMatter();
         w.ui.breadcrumbs(w.options.defaults.crumbs);
         w.editor.load();
+        w.inplace.init();
+        w.ui.inplaceInit();
 
         w.ui.tocEvent();
         w.ui.goContentEvent();
@@ -329,6 +343,38 @@ $.extend(w, {ui: {
     frontMatter: function() {
         if (!w.ui.inited) { return false; }
         w.ui.fillList($('#toc'), w.meta.frontMatter);
+    },
+    inplaceInit: function() {
+        $.fn.yellow = function () {
+            $(this).mouseover(function () {
+                $.data(this, 'bc', $(this).css('background-color'));
+                $(this).css('background-color', '#ffffaa');
+            }).mouseout(function () {
+                $(this).css('background-color', $.data(this, 'bc'));
+            });
+            return this;
+        };
+        $("#header h1").yellow().dblclick(function(e) {
+            w.inplace.show(this, w.book.meta.title, function(e) {
+                w.book.meta.title = $("#inplace-input", this).val();
+                w.ui.updateHeader();
+            });
+            return false;
+        });
+        $("#description").yellow().dblclick(function(e) {
+            w.inplace.show(this, w.book.meta.description, function(e) {
+                w.book.meta.description = $("#inplace-input", this).val();
+                w.ui.updateHeader();
+            });
+            return false;
+        });
+        $("#creator").yellow().dblclick(function(e) {
+            w.inplace.show(this, w.book.meta.creator, function(e) {
+                w.book.meta.creator = $("#inplace-input", this).val();
+                w.ui.updateHeader();
+            });
+            return false;
+        });
     },
     toc: function() {
         if (!w.ui.inited) { return false; }

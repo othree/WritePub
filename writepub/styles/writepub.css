@@ -97,6 +97,19 @@ h1 {
 }
 #editor {
 }
+#inplace {
+    position: absolute;
+}
+#inplace form {
+    position: relative;
+    top: -5px;
+    left: -5px;
+    padding: 4px;
+    background: white;
+    border: 1px solid black;
+    text-align: left;
+    line-height: 1.5;
+}
 
 a:link,
 a:visited {

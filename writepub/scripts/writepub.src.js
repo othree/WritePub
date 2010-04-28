@@ -178,7 +178,7 @@ $.extend(w, {
 });
 
 $.extend(w, {editor: {
-    load: function () {
+    init: function () {
         if (w.editor.inited) { return false; }
         $('#editor').tinymce({
             script_url : 'writepub/vendor/tinymce/jscripts/tiny_mce/tiny_mce.js',
@@ -290,7 +290,8 @@ $.extend(w, {inplace: {
         if (coord.top) { newCoord.top = coord.top; }
         if (coord.left) { newCoord.left = coord.left; }
         $(target).offset(newCoord);
-        if (coord.width) { $(target).width(coord.width+4); }
+        //if (coord.width) { $(target).width(coord.width+4); }
+        if (coord.width) { $(target).width(coord.width*2); }
         if (coord.height) { $(target).height(coord.height); }
     },
     editor: null,
@@ -318,7 +319,7 @@ $.extend(w, {ui: {
         w.ui.toolbar(w.meta.toolbar);
         w.ui.frontMatter();
         w.ui.breadcrumbs(w.options.defaults.crumbs);
-        w.editor.load();
+        w.editor.init();
         w.inplace.init();
         w.ui.inplaceInit();
 
@@ -346,35 +347,27 @@ $.extend(w, {ui: {
     },
     inplaceInit: function() {
         $.fn.yellow = function () {
+            var background;
             $(this).mouseover(function () {
-                $.data(this, 'bc', $(this).css('background-color'));
+                background = $(this).css('background-color');
                 $(this).css('background-color', '#ffffaa');
             }).mouseout(function () {
-                $(this).css('background-color', $.data(this, 'bc'));
+                $(this).css('background-color', background);
             });
             return this;
         };
-        $("#header h1").yellow().dblclick(function(e) {
-            w.inplace.show(this, w.book.meta.title, function(e) {
-                w.book.meta.title = $("#inplace-input", this).val();
-                w.ui.updateHeader();
+        $.fn.bookmetaInplace = function (meta) {
+            $(this).dblclick(function(e) {
+                w.inplace.show(this, w.book.meta[meta], function(e) {
+                    w.book.meta[meta] = $("#inplace-input", this).val();
+                    w.ui.updateHeader();
+                });
+                return false;
             });
-            return false;
-        });
-        $("#description").yellow().dblclick(function(e) {
-            w.inplace.show(this, w.book.meta.description, function(e) {
-                w.book.meta.description = $("#inplace-input", this).val();
-                w.ui.updateHeader();
-            });
-            return false;
-        });
-        $("#creator").yellow().dblclick(function(e) {
-            w.inplace.show(this, w.book.meta.creator, function(e) {
-                w.book.meta.creator = $("#inplace-input", this).val();
-                w.ui.updateHeader();
-            });
-            return false;
-        });
+        };
+        $("#header h1").yellow().bookmetaInplace('title');
+        $("#description").yellow().bookmetaInplace('description');
+        $("#creator").yellow().bookmetaInplace('creator');
     },
     toc: function() {
         if (!w.ui.inited) { return false; }

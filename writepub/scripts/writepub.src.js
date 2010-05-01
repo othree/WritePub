@@ -39,9 +39,13 @@ $.extend(w, {
             publisher: '',
             language: '',
             rights: '',
-            toc: {
-                ch1: {title: 'Chapter 1'}
-            }
+            toc: [
+                {
+                    title: 'Chapter 1', id: '1125834' , sub: [
+                        {title: 'Chapter 1-1', id: '1125348'}
+                    ]
+                }
+            ]
         }
     }
 });
@@ -79,10 +83,10 @@ $.extend(w, {
         if (id.match(/^ch\d(-\d)*$/) || id.indexOf('http') === 0 || id == 'mainpage') {
             return id;
         } else {
-           for ( var eid in w.meta.frontMatter) {
+            for ( var eid in w.meta.frontMatter) {
                 if (eid == id) { return id; }
-           }
-           return false;
+            }
+            return false;
         }
     },
     genId: function (uri) {
@@ -91,7 +95,23 @@ $.extend(w, {
             id = uri.substring(start, end);
         return w.idExist(w.safeId(id));
     },
-    genFilePath: function (filename) {
+    genFilePath: function (id) {
+        var filename;
+        id = w.idExist(id) || id;
+        if (id.match(/^ch\d(-\d)*$/)) {
+            var chs = id.substring(2).split('-'),
+                ch = w.book.meta.toc,
+                last = chs.pop()-1;
+            for (var i=0, len=chs.length; i<len; i++) {
+                ch = ch[chs[i]-1].sub;
+            }
+            filename = ch[last].id;
+        } else {
+            filename = id;
+        }
+        return w.prependPath(filename);
+    },
+    prependPath: function (filename) {
         if (filename.indexOf('.') === -1) {
             return w.options.booksPath + '/' + w.book.meta.id + '/' + filename + '.' + w.options.fileExt;
         } else {
@@ -105,8 +125,8 @@ $.extend(w, {
             var crumbs = {
                 mainpage: {title: 'main page', value: w.book.meta.mainPage}
             };
-            if (id.match(/^ch\d+(-\d+)*$/)) {
-                crumbs[id] = {title: w.book.meta.toc[id].title};
+            if (id.match(/^ch\d(-\d)*$/)) {
+                //crumbs[id] = {title: w.book.meta.toc[id].title};
             } else {
                 crumbs[id] = {title: w.meta.frontMatter[id].title};
             }
@@ -305,6 +325,37 @@ $.extend(w, {inplace: {
         '</div>'
 }});
 
+$.extend(w, {toc: {
+    init: function() {
+    },
+    html: function() {
+        var toc = w.book.meta.toc;
+        function t (items, prefix, root) {
+            if ($.isArray(items) && items.length > 0) {
+                var html = '';
+                for(var i in items) {
+                    var id = prefix + (parseInt(i, 10)+1);
+                    html += '<li><a id="'+id+'" href="'+w.genFilePath(id)+'">'+_(items[i].title)+'</a>'+t(items[i].sub, id+'-')+'</li>';
+                }
+                if (root === true) {
+                    return html;
+                } else {
+                    return '<ol>'+html+'</ol>';
+                }
+            } else {
+                return '';
+            }
+        }
+        return t(toc, 'ch', true);
+    },
+    move: function(index, parent, item) {
+    },
+    add: function(index, parent, item) {
+    },
+    del: function(index, parent) {
+    }
+}});
+
 $.extend(w, {ui: {
     init: function() {
         if (!w.inited || w.ui.inited) { return false; }
@@ -371,12 +422,15 @@ $.extend(w, {ui: {
     },
     toc: function() {
         if (!w.ui.inited) { return false; }
-        w.ui.fillList($('#toc'), w.book.meta.toc);
+        $('#toc').html(w.toc.html());
     },
     tocEvent: function() {
         $('#toc').click(function (e) {
             var uri = $(e.target).attr('href'),
                 id = w.genId(uri);
+            if (id === false) {
+                id = w.idExist($(e.target).attr('id'));
+            }
             if (id !== false) {
                 w.load(id);
                 e.stopPropagation();
@@ -391,7 +445,7 @@ $.extend(w, {ui: {
             w.ui.toc();
             $('#goto-content').parent().hide();
             $('#backto-main').parent().show();
-            w.load('ch1');
+            w.load(w.book.meta.toc[0].id);
             e.stopPropagation();
             e.preventDefault();
             return false;

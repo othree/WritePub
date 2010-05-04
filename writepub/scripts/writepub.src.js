@@ -39,13 +39,18 @@ $.extend(w, {
             publisher: '',
             language: '',
             rights: '',
-            toc: [
-                {
-                    title: 'Chapter 1', id: '1125834' , sub: [
-                        {title: 'Chapter 1-1', id: '1125348'}
-                    ]
-                }
-            ]
+            toc: {
+                root: true,
+                sub: [
+                    0,
+                    {
+                        title: 'Chapter 1', id: '1125834' , sub: [
+                            0,
+                            {title: 'Chapter 1-1', id: '1125348'}
+                        ]
+                    }
+                ]
+            }
         }
     }
 });
@@ -78,9 +83,12 @@ $.extend(w, {
     safeId: function (id) {
         return id.replace(/[^\w\d-_%]/g, '');
     },
+    chId: function (id) {
+        return !!id.match(/^ch\d(-\d)*$/);
+    },
     idExist: function (id) {
         id = w.safeId(id);
-        if (id.match(/^ch\d(-\d)*$/) || id.indexOf('http') === 0 || id == 'mainpage') {
+        if (w.chId(id) || id.indexOf('http') === 0 || id == 'mainpage') {
             return id;
         } else {
             for ( var eid in w.meta.frontMatter) {
@@ -101,9 +109,9 @@ $.extend(w, {
         if (id.match(/^ch\d(-\d)*$/)) {
             var chs = id.substring(2).split('-'),
                 ch = w.book.meta.toc,
-                last = chs.pop()-1;
+                last = chs.pop();
             for (var i=0, len=chs.length; i<len; i++) {
-                ch = ch[chs[i]-1].sub;
+                ch = ch[chs[i]].sub;
             }
             filename = ch[last].id;
         } else {
@@ -328,13 +336,14 @@ $.extend(w, {inplace: {
 $.extend(w, {toc: {
     init: function() {
     },
-    html: function() {
-        var toc = w.book.meta.toc;
+    html: function(toc) {
+        toc = toc || w.book.meta.toc;
         function t (items, prefix, root) {
             if ($.isArray(items) && items.length > 0) {
                 var html = '';
                 for(var i in items) {
-                    var id = prefix + (parseInt(i, 10)+1);
+                    if (items[i] === 0) { continue; }
+                    var id = prefix + (parseInt(i, 10));
                     html += '<li><a id="'+id+'" href="'+w.genFilePath(id)+'">'+_(items[i].title)+'</a>'+t(items[i].sub, id+'-')+'</li>';
                 }
                 if (root === true) {
@@ -346,13 +355,41 @@ $.extend(w, {toc: {
                 return '';
             }
         }
-        return t(toc, 'ch', true);
+        return t(toc.sub, 'ch', toc.root);
     },
-    move: function(index, parent, item) {
+    move: function(from, to) {
+        var item = w.toc.remove(from);
+        return (item)? w.toc.insert(to, item) : false ;
     },
-    add: function(index, parent, item) {
+    insert: function(index, item) {
+        if (!w.isCh(index)) { return false; }
+        var chs = w.toc.chs(index),
+            chsParent = chs.slice(0,-1),
+            chParent = w.toc.getCh(chsParent),
+            chIndex = chs.slice(-1);
+        if (!chParent || chParent.sub.length <= chIndex) { return false; }
+        chParent.sub.splice(index, 0, item);
+        return true;
     },
-    del: function(index, parent) {
+    remove: function(index) {
+        if (!w.isCh(index)) { return false; }
+        var chs = w.toc.chs(index),
+            chsParent = chs.slice(0,-1),
+            chParent = w.toc.getCh(chsParent),
+            chIndex = chs.slice(-1);
+        if (!chParent || chParent.sub.length < chIndex) { return false; }
+        return chParent.sub.remove(index);
+    },
+    chs: function(ch) {
+        return ch.substring(2).split('-');
+    },
+    getCh: function(chs) {
+        var ch = w.book.meta.toc.sub,
+            last = chs.pop();
+        for (var i=0, len=chs.length; i<len; i++) {
+            ch = ch[chs[i]].sub;
+        }
+        return ch[last];
     }
 }});
 
@@ -445,7 +482,7 @@ $.extend(w, {ui: {
             w.ui.toc();
             $('#goto-content').parent().hide();
             $('#backto-main').parent().show();
-            w.load(w.book.meta.toc[0].id);
+            w.load(w.book.meta.toc[1].id);
             e.stopPropagation();
             e.preventDefault();
             return false;
@@ -501,6 +538,14 @@ $.extend(w, {ui: {
 }});
 
 $(w.init);
+
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
+
 
 window.writepub = w;
 

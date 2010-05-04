@@ -84,7 +84,7 @@ $.extend(w, {
         return id.replace(/[^\w\d-_%]/g, '');
     },
     chId: function (id) {
-        return !!id.match(/^ch\d(-\d)*$/);
+        return !!id.match(/^ch\d(-\d)*$/) || !!id.match(/^\d+$/);
     },
     idExist: function (id) {
         id = w.safeId(id);
@@ -108,7 +108,7 @@ $.extend(w, {
         id = w.idExist(id) || id;
         if (id.match(/^ch\d(-\d)*$/)) {
             var chs = id.substring(2).split('-'),
-                ch = w.book.meta.toc,
+                ch = w.book.meta.toc.sub,
                 last = chs.pop();
             for (var i=0, len=chs.length; i<len; i++) {
                 ch = ch[chs[i]].sub;
@@ -133,7 +133,7 @@ $.extend(w, {
             var crumbs = {
                 mainpage: {title: 'main page', value: w.book.meta.mainPage}
             };
-            if (id.match(/^ch\d(-\d)*$/)) {
+            if (w.chId(id)) {
                 //crumbs[id] = {title: w.book.meta.toc[id].title};
             } else {
                 crumbs[id] = {title: w.meta.frontMatter[id].title};
@@ -342,7 +342,7 @@ $.extend(w, {toc: {
             if ($.isArray(items) && items.length > 0) {
                 var html = '';
                 for(var i in items) {
-                    if (items[i] === 0) { continue; }
+                    if (items[i] === 0 || !items.hasOwnProperty(i)) { continue; }
                     var id = prefix + (parseInt(i, 10));
                     html += '<li><a id="'+id+'" href="'+w.genFilePath(id)+'">'+_(items[i].title)+'</a>'+t(items[i].sub, id+'-')+'</li>';
                 }
@@ -482,7 +482,7 @@ $.extend(w, {ui: {
             w.ui.toc();
             $('#goto-content').parent().hide();
             $('#backto-main').parent().show();
-            w.load(w.book.meta.toc[1].id);
+            w.load(w.book.meta.toc.sub[1].id);
             e.stopPropagation();
             e.preventDefault();
             return false;

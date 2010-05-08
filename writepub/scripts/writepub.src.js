@@ -278,8 +278,10 @@ $.extend(w, {inplace: {
             return false;
         });
         inplace.find('#inplace-cancel').click(function (e) {
-            w.inplace.callback = null;
             w.inplace.hide();
+            if ($.isFunction(w.inplace.cancelback)) { w.inplace.cancelback.apply(this, arguments); }
+            w.inplace.callback = null;
+            w.inplace.cancelback = null;
             return false;
         });
         w.inplace.editor = inplace;

@@ -284,7 +284,14 @@ $.extend(w, {inplace: {
         });
         w.inplace.editor = inplace;
     },
-    show: function (target, value, callback) {
+    esc: function(e) {
+        if (e.keyCode == 27) {
+            w.inplace.hide();
+            if ($.isFunction(w.inplace.cancelback)) { w.inplace.cancelback.apply(this, arguments); }
+            w.inplace.cancelback = null;
+        }
+    },
+    show: function (target, value, callback, cancelback) {
         if (!w.inited || !w.inplace.inited) { return false; }
         var coord = w.inplace.getCoord(target),
             offset = {
@@ -297,13 +304,15 @@ $.extend(w, {inplace: {
             };
         w.inplace.setCoord(w.inplace.editor, offset);
         w.inplace.setCoord(w.inplace.editor.find('#inplace-input'), size);
-        w.inplace.editor.find('#inplace-input').val(value);
-        w.inplace.editor.show();
+        w.inplace.editor.show().find('#inplace-input').val(value).focus();
         w.inplace.callback = callback;
+        w.inplace.cancelback = cancelback;
+        $(document).bind('keydown', w.inplace.esc);
     },
     hide: function () {
         if (!w.inited || !w.inplace.inited) { return false; }
         w.inplace.editor.hide();
+        $(document).unbind('keydown', w.inplace.esc);
     },
     getCoord: function (target) {
         if (!w.inited || !w.inplace.inited) { return false; }
@@ -476,7 +485,7 @@ $.extend(w.toc, {ui: {
         if (!w.chId(id)) { return false; }
         $(w.toc.toc).find('a').removeClass('selected');
         this.target = id;
-        return $('#'+id).addClass('selected');
+        return $('#'+id).addClass('selected').focus();
     },
     attachEvent: function(target) {
         $(target).click(function (e) {
@@ -489,7 +498,7 @@ $.extend(w.toc, {ui: {
         $(target).dblclick(function (e) {
             if (!this.focused) { return false; }
             var target = e.target,
-                chs = w.toc.chs(this.target),
+                chs = w.toc.chs(target.id),
                 ch = w.toc.getCh(chs);
             w.inplace.show(target, ch.title, function (value) {
                 ch.title = $("#inplace-input", this).val();
@@ -506,6 +515,7 @@ $.extend(w.toc, {ui: {
                 w.inplace.show($('#'+w.toc.ui.target), ch.title, function (value) {
                     ch.title = $("#inplace-input", this).val();
                     w.ui.toc();
+                    w.toc.ui.select(w.toc.ui.target);
                 });   
             } else if (e.keyCode == 38) { //up
                 chs = w.toc.ui.up(chs);

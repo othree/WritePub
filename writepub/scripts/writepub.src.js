@@ -46,9 +46,11 @@ $.extend(w, {
                     {
                         title: 'Chapter 1', id: '1125834' , sub: [
                             0,
-                            {title: 'Chapter 1-1', id: '1125348'}
+                            {title: 'Chapter 1-1', id: '1125348'},
+                            {title: 'Chapter 1-2', id: '1155348'}
                         ]
-                    }
+                    },
+                    {title: 'Chapter 2', id: '112534778'}
                 ]
             }
         }
@@ -65,6 +67,7 @@ $.extend(w, {
 
         w.loadMeta();
         w.ui.init();
+        w.toc.init('#toc');
         w.presentId = w.getInitId();
         w.load(w.presentId);
     },
@@ -334,7 +337,11 @@ $.extend(w, {inplace: {
 }});
 
 $.extend(w, {toc: {
-    init: function() {
+    init: function(target) {
+        if (!w.inited) { return false; }
+        this.inited = true;
+        this.toc = $(target);
+        this.ui.init(target);
     },
     html: function(toc) {
         toc = toc || w.book.meta.toc;
@@ -384,15 +391,139 @@ $.extend(w, {toc: {
         return ch.substring(2).split('-');
     },
     getCh: function(chs) {
+        if (chs.length === 0) { return w.book.meta.toc; }
+        chs = chs.slice();
         var ch = w.book.meta.toc.sub,
             last = chs.pop();
         for (var i=0, len=chs.length; i<len; i++) {
             ch = ch[chs[i]].sub;
         }
         return ch[last];
-    }
+    },
+    toc: null
 }});
 
+$.extend(w.toc, {ui: {
+    init: function(target) {
+        if (!w.toc.inited) { return false; }
+        this.inited = true;
+        this.attachEvent(target);
+    },
+    up: function(chs) {
+        function findLast(chs) {
+            var ch = w.toc.getCh(chs);
+            if (ch.sub && ch.sub.length > 1) {
+                chs.push((ch.sub.length-1)+"");
+                return findLast(chs);
+            } else {
+                return chs;
+            }
+        }
+        function minus(chs) {
+            var last = parseInt(chs.pop(), 10) - 1;
+            if (last > 0) {
+                chs.push(last+"");
+                return findLast(chs);
+            } else { return chs; }
+        }
+        return minus(chs);
+    },
+    down: function(chs) {
+        function findFirst(chs) {
+            var ch = w.toc.getCh(chs);
+            if (ch.sub && ch.sub.length > 1) {
+                chs.push("1");
+                return findFirst(chs);
+            } else {
+                return chs;
+            }
+        }
+        function findNext(chs) { //through parent
+            var last = parseInt(chs.pop(), 10) + 1,
+                ch = w.toc.getCh(chs);
+            if (last < ch.sub.length) {
+                chs.push(last);
+                return chs;
+            } else {
+                return chs.length === 0 ? false : findNext(chs);
+            }
+        }
+        function plus(chs) {
+            var last = chs.slice(-1),
+                ch = w.toc.getCh(chs);
+            if (ch.sub && ch.sub.length > 0) {
+                chs.push("1");
+                return chs;
+            } else { 
+                return findNext(chs);
+            }
+        }
+        return plus(chs);
+    },
+    left: function(chs) {
+        chs.pop();
+        return chs.length === 0 ? false : chs ;
+    },
+    right: function(chs) {
+        var ch = w.toc.getCh(chs);
+        if (ch.sub && ch.sub.length > 0) {
+            chs.push("1");
+            return chs;
+        } else { return false; }
+    },
+    select: function(id) {
+        if ($.isArray(id)) { id = 'ch'+id.join('-'); }
+        if (!w.chId(id)) { return false; }
+        $(w.toc.toc).find('a').removeClass('selected');
+        this.target = id;
+        return $('#'+id).addClass('selected');
+    },
+    attachEvent: function(target) {
+        $(target).click(function (e) {
+            var target = e.target,
+                ch = target ? target.id : "";
+            this.focused = true;
+            if (ch === "" || !w.chId(ch)) { return false; }
+            w.toc.ui.select(ch);
+        });
+        $(target).dblclick(function (e) {
+            if (!this.focused) { return false; }
+            var target = e.target,
+                chs = w.toc.chs(this.target),
+                ch = w.toc.getCh(chs);
+            w.inplace.show(target, ch.title, function (value) {
+                ch.title = $("#inplace-input", this).val();
+                w.ui.toc();
+            });   
+        });
+        $(target).keydown(function (e) {
+            if (!this.focused) { return false; }
+            var target = e.target,
+                chs = w.toc.chs(w.toc.ui.target),
+                ch;
+            if (e.keyCode == 13) { //enter
+                ch = w.toc.getCh(chs);
+                w.inplace.show($('#'+w.toc.ui.target), ch.title, function (value) {
+                    ch.title = $("#inplace-input", this).val();
+                    w.ui.toc();
+                });   
+            } else if (e.keyCode == 38) { //up
+                chs = w.toc.ui.up(chs);
+                w.toc.ui.select(chs);
+            } else if (e.keyCode == 40) { //down
+                chs = w.toc.ui.down(chs);
+                if (chs !== false) { w.toc.ui.select(chs); }
+            } else if (e.keyCode == 37) { //left
+                chs = w.toc.ui.left(chs);
+                if (chs !== false) { w.toc.ui.select(chs); }
+            } else if (e.keyCode == 39) { //right
+                chs = w.toc.ui.right(chs);
+                if (chs !== false) { w.toc.ui.select(chs); }
+            }
+        });
+    },
+    focus: false
+}});
 $.extend(w, {ui: {
     init: function() {
         if (!w.inited || w.ui.inited) { return false; }

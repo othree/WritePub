@@ -304,10 +304,13 @@ $.extend(w, {inplace: {
             };
         w.inplace.setCoord(w.inplace.editor, offset);
         w.inplace.setCoord(w.inplace.editor.find('#inplace-input'), size);
-        w.inplace.editor.show().find('#inplace-input').val(value).focus();
+        w.inplace.editor.show().find('#inplace-input').val(value);
         w.inplace.callback = callback;
         w.inplace.cancelback = cancelback;
         $(document).bind('keydown', w.inplace.esc);
+        setTimeout(function () {
+            $('#inplace-input').focus();
+        }, 100);
     },
     hide: function () {
         if (!w.inited || !w.inplace.inited) { return false; }
@@ -331,7 +334,7 @@ $.extend(w, {inplace: {
         if (coord.left) { newCoord.left = coord.left; }
         $(target).offset(newCoord);
         //if (coord.width) { $(target).width(coord.width+4); }
-        if (coord.width) { $(target).width(coord.width*2); }
+        if (coord.width) { $(target).width(coord.width*1.5 < 100 ? 100 : coord.width*1.5); }
         if (coord.height) { $(target).height(coord.height); }
     },
     editor: null,
@@ -503,6 +506,8 @@ $.extend(w.toc, {ui: {
             w.inplace.show(target, ch.title, function (value) {
                 ch.title = $("#inplace-input", this).val();
                 w.ui.toc();
+            }, function () {
+                w.toc.ui.select(w.toc.ui.target);
             });   
         });
         $(target).keydown(function (e) {
@@ -515,6 +520,8 @@ $.extend(w.toc, {ui: {
                 w.inplace.show($('#'+w.toc.ui.target), ch.title, function (value) {
                     ch.title = $("#inplace-input", this).val();
                     w.ui.toc();
+                    w.toc.ui.select(w.toc.ui.target);
+                }, function () {
                     w.toc.ui.select(w.toc.ui.target);
                 });   
             } else if (e.keyCode == 38) { //up

@@ -385,7 +385,8 @@ $.extend(w, {toc: {
         };
     },
     move: function(from, to) {
-        var item = w.toc.remove(from);
+        var item = w.toc.getCh(w.toc.chs(from));
+        w.toc.remove(from);
         return (item)? w.toc.insert(to, item) : false ;
     },
     insert: function(index, item) {
@@ -394,8 +395,9 @@ $.extend(w, {toc: {
             chsParent = chs.slice(0,-1),
             chParent = w.toc.getCh(chsParent),
             chIndex = chs.slice(-1);
-        if (!chParent || chParent.sub.length <= chIndex) { return false; }
-        chParent.sub.splice(parseInt(chIndex, 10), 0, item);
+        if (chParent && !chParent.sub) { chParent.sub = [0]; }
+        if (!chParent || chParent.sub.length < chIndex) { return false; }
+        chParent.sub.splice(chIndex, 0, item);
         return true;
     },
     remove: function(index) {
@@ -403,12 +405,44 @@ $.extend(w, {toc: {
         var chs = w.toc.chs(index),
             chsParent = chs.slice(0,-1),
             chParent = w.toc.getCh(chsParent),
-            chIndex = chs.slice(-1);
+            chIndex = chs.pop();
         if (!chParent || chParent.sub.length < chIndex) { return false; }
-        return chParent.sub.remove(index);
+        chParent.sub.remove(chIndex);
+        console.log(chIndex);
+        return true;
+    },
+    down: function(index) {
+        if (!w.chId(index)) { return false; }
+        var chs = w.toc.chs(index),
+            chsParent = chs.slice(0,-1),
+            chParent = w.toc.getCh(chsParent),
+            chIndex = chs.pop();
+        if (!chParent || 1 == chIndex) { return false; }
+        chs.push(chIndex-1);
+        var previous = w.toc.getCh(chs);
+        chs.push(previous.sub ? previous.sub.length : 1);
+        w.toc.move(index, w.toc.shc(chs));
+        return chs;
+    },
+    up: function(index) {
+        if (!w.chId(index)) { return false; }
+        var chs = w.toc.chs(index),
+            chsParent = chs.slice(0,-1),
+            chParent = w.toc.getCh(chsParent),
+            chIndex = chs.pop();
+        if (!chParent) { return false; }
+        var previous = chs.pop() + 1;
+        chs.push(previous);
+        w.toc.move(index, w.toc.shc(chs));
+        return chs;
     },
     chs: function(ch) {
-        return ch.substring(2).split('-');
+        return $.map(ch.substring(2).split('-'), function(v) {
+            return parseInt(v, 10);
+        });
+    },
+    shc: function(chs) {
+        return "ch"+chs.join('-');
     },
     getCh: function(chs) {
         if (chs.length === 0) { return w.book.meta.toc; }
@@ -440,9 +474,9 @@ $.extend(w.toc, {ui: {
             }
         }
         function minus(chs) {
-            var last = parseInt(chs.pop(), 10) - 1;
+            var last = chs.pop() - 1;
             if (last > 0) {
-                chs.push(last+"");
+                chs.push(last);
                 return findLast(chs);
             } else { return chs; }
         }
@@ -452,14 +486,14 @@ $.extend(w.toc, {ui: {
         function findFirst(chs) {
             var ch = w.toc.getCh(chs);
             if (ch.sub && ch.sub.length > 1) {
-                chs.push("1");
+                chs.push(1);
                 return findFirst(chs);
             } else {
                 return chs;
             }
         }
         function findNext(chs) { //through parent
-            var last = parseInt(chs.pop(), 10) + 1,
+            var last = chs.pop() + 1,
                 ch = w.toc.getCh(chs);
             if (last < ch.sub.length) {
                 chs.push(last);
@@ -472,7 +506,7 @@ $.extend(w.toc, {ui: {
             var last = chs.slice(-1),
                 ch = w.toc.getCh(chs);
             if (ch.sub && ch.sub.length > 0) {
-                chs.push("1");
+                chs.push(1);
                 return chs;
             } else { 
                 return findNext(chs);
@@ -487,13 +521,18 @@ $.extend(w.toc, {ui: {
     right: function(chs) {
         var ch = w.toc.getCh(chs);
         if (ch.sub && ch.sub.length > 0) {
-            chs.push("1");
+            chs.push(1);
             return chs;
         } else { return false; }
     },
     insert: function(chs) {
-        var id = 'ch'+chs.join('-');
+        var id = w.toc.shc(chs);
         w.toc.insert(id, w.toc.newCh(id));
+        return chs;
+    },
+    remove: function(chs) {
+        var id = w.toc.shc(chs);
+        w.toc.remove(id);
         return chs;
     },
     select: function(id) {
@@ -553,6 +592,20 @@ $.extend(w.toc, {ui: {
                 chs = w.toc.ui.insert(chs);
                 w.ui.toc();
                 if (chs !== false) { w.toc.ui.select(chs); }
+            } else if (e.keyCode == 46) { //remove
+                chs = w.toc.ui.remove(chs);
+                w.ui.toc();
+                if (chs !== false) { w.toc.ui.select(chs); }
+            } else if (e.keyCode == 9) { //tab
+                if (e.shiftKey) {
+                    chs = w.toc.up(w.toc.shc(chs));
+                } else {
+                    chs = w.toc.down(w.toc.shc(chs));
+                }
+                w.ui.toc();
+                if (chs !== false) { w.toc.ui.select(chs); }
+            } else {
+                //alert(e.keyCode);
             }
         });
     },

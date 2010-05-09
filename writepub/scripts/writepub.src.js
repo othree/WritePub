@@ -520,8 +520,7 @@ $.extend(w.toc, {ui: {
         } else { return false; }
     },
     insert: function(chs) {
-        var id = w.toc.shc(chs);
-        w.toc.insert(id, w.toc.newCh(id));
+        w.toc.insert(chs, w.toc.newCh(w.toc.shc(chs)));
         return chs;
     },
     remove: function(chs) {
@@ -561,6 +560,12 @@ $.extend(w.toc, {ui: {
                 chs = w.toc.chs(w.toc.ui.target),
                 ch, newchs;
             if (e.keyCode == 13) { //enter
+                ch = w.toc.getCh(chs);
+                chs.push((ch.sub && ch.sub.length > 1)? ch.sub.length : 1);
+                chs = w.toc.ui.insert(chs);
+                w.ui.toc();
+                w.toc.ui.select(chs);
+            } else if (e.keyCode == 32) { //space
                 ch = w.toc.getCh(chs);
                 w.inplace.show($('#'+w.toc.ui.target), ch.title, function (value) {
                     ch.title = $("#inplace-input", this).val();
@@ -602,6 +607,9 @@ $.extend(w.toc, {ui: {
                 chs = w.toc.ui.right(chs);
                 if (chs !== false) { w.toc.ui.select(chs); }
             } else if (e.keyCode == 45) { //insert
+                if (e.shiftKey) {
+                    chs.push(chs.pop()+1);
+                }
                 chs = w.toc.ui.insert(chs);
                 w.ui.toc();
                 if (chs !== false) { w.toc.ui.select(chs); }

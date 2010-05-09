@@ -90,11 +90,15 @@ $.extend(w, {
         return !!id.match(/^ch\d(-\d)*$/) || !!id.match(/^\d+$/);
     },
     idExist: function (id) {
+        var eid;
         id = w.safeId(id);
         if (w.chId(id) || id.indexOf('http') === 0 || id == 'mainpage') {
             return id;
         } else {
-            for ( var eid in w.meta.frontMatter) {
+            for ( eid in w.meta.frontMatter) {
+                if (eid == id) { return id; }
+            }
+            for ( eid in w.meta.toolbar) {
                 if (eid == id) { return id; }
             }
             return false;
@@ -136,10 +140,11 @@ $.extend(w, {
                 mainpage: {title: 'main page', value: w.book.meta.mainPage}
             };
             if (w.chId(id)) {
-                var chs = w.toc.chs(id), ch = w.book.meta.toc.sub;
+                var chs = w.toc.chs(id), ch = w.book.meta.toc.sub, shc = 'ch';
                 for (var i = 0, len=chs.length; i < len; i++) {
                     ch = ch[chs[i]];
-                    crumbs[i] = {title: ch.title};
+                    shc += ((i===0?'':'-')+chs[i]);
+                    crumbs[shc] = {title: ch.title};
                     if (i+1 == len) {
                         id = ch.id;
                     } else {

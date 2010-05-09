@@ -385,14 +385,12 @@ $.extend(w, {toc: {
         };
     },
     move: function(from, to) {
-        var item = w.toc.getCh(w.toc.chs(from));
+        var item = w.toc.getCh(from);
         w.toc.remove(from);
         return (item)? w.toc.insert(to, item) : false ;
     },
-    insert: function(index, item) {
-        if (!w.chId(index)) { return false; }
-        var chs = w.toc.chs(index),
-            chsParent = chs.slice(0,-1),
+    insert: function(chs, item) {
+        var chsParent = chs.slice(0,-1),
             chParent = w.toc.getCh(chsParent),
             chIndex = chs.slice(-1);
         if (chParent && !chParent.sub) { chParent.sub = [0]; }
@@ -400,41 +398,35 @@ $.extend(w, {toc: {
         chParent.sub.splice(chIndex, 0, item);
         return true;
     },
-    remove: function(index) {
-        if (!w.chId(index)) { return false; }
-        var chs = w.toc.chs(index),
-            chsParent = chs.slice(0,-1),
+    remove: function(chs) {
+        var chsParent = chs.slice(0,-1),
             chParent = w.toc.getCh(chsParent),
             chIndex = chs.pop();
         if (!chParent || chParent.sub.length < chIndex) { return false; }
         chParent.sub.remove(chIndex);
-        console.log(chIndex);
         return true;
     },
-    down: function(index) {
-        if (!w.chId(index)) { return false; }
-        var chs = w.toc.chs(index),
-            chsParent = chs.slice(0,-1),
-            chParent = w.toc.getCh(chsParent),
-            chIndex = chs.pop();
-        if (!chParent || 1 == chIndex) { return false; }
-        chs.push(chIndex-1);
-        var previous = w.toc.getCh(chs);
-        chs.push(previous.sub ? previous.sub.length : 1);
-        w.toc.move(index, w.toc.shc(chs));
-        return chs;
+    stab: function(chs) {
+        var newchs = chs.slice(0, -1),
+            previous = newchs.pop()+1;
+        if (previous === 0) { return chs; }
+        else {
+            newchs.push(previous);
+            w.toc.move(chs, newchs);
+            return newchs;
+        }
     },
-    up: function(index) {
-        if (!w.chId(index)) { return false; }
-        var chs = w.toc.chs(index),
-            chsParent = chs.slice(0,-1),
-            chParent = w.toc.getCh(chsParent),
-            chIndex = chs.pop();
-        if (!chParent) { return false; }
-        var previous = chs.pop() + 1;
-        chs.push(previous);
-        w.toc.move(index, w.toc.shc(chs));
-        return chs;
+    tab: function(chs) {
+        var newchs = chs.slice(),
+            previous = newchs.pop()-1;
+        if (previous === 0) { return chs; }
+        else {
+            newchs.push(previous);
+            previous = w.toc.getCh(newchs);
+            newchs.push(previous.sub ? previous.sub.length : 1);
+            w.toc.move(chs, newchs);
+            return newchs;
+        }
     },
     chs: function(ch) {
         return $.map(ch.substring(2).split('-'), function(v) {
@@ -464,10 +456,11 @@ $.extend(w.toc, {ui: {
         this.attachEvent(target);
     },
     up: function(chs) {
+        chs = chs.slice();
         function findLast(chs) {
             var ch = w.toc.getCh(chs);
             if (ch.sub && ch.sub.length > 1) {
-                chs.push((ch.sub.length-1)+"");
+                chs.push((ch.sub.length-1));
                 return findLast(chs);
             } else {
                 return chs;
@@ -483,6 +476,7 @@ $.extend(w.toc, {ui: {
         return minus(chs);
     },
     down: function(chs) {
+        chs = chs.slice();
         function findFirst(chs) {
             var ch = w.toc.getCh(chs);
             if (ch.sub && ch.sub.length > 1) {
@@ -505,7 +499,7 @@ $.extend(w.toc, {ui: {
         function plus(chs) {
             var last = chs.slice(-1),
                 ch = w.toc.getCh(chs);
-            if (ch.sub && ch.sub.length > 0) {
+            if (ch.sub && ch.sub.length > 1) {
                 chs.push(1);
                 return chs;
             } else { 
@@ -531,8 +525,7 @@ $.extend(w.toc, {ui: {
         return chs;
     },
     remove: function(chs) {
-        var id = w.toc.shc(chs);
-        w.toc.remove(id);
+        w.toc.remove(chs);
         return chs;
     },
     select: function(id) {
@@ -566,7 +559,7 @@ $.extend(w.toc, {ui: {
             if (!this.focused) { return false; }
             var target = e.target,
                 chs = w.toc.chs(w.toc.ui.target),
-                ch;
+                ch, newchs;
             if (e.keyCode == 13) { //enter
                 ch = w.toc.getCh(chs);
                 w.inplace.show($('#'+w.toc.ui.target), ch.title, function (value) {
@@ -577,11 +570,31 @@ $.extend(w.toc, {ui: {
                     w.toc.ui.select(w.toc.ui.target);
                 });   
             } else if (e.keyCode == 38) { //up
-                chs = w.toc.ui.up(chs);
-                w.toc.ui.select(chs);
+                newchs = w.toc.ui.up(chs);
+                if (newchs !== false) {
+                    if (e.shiftKey) {
+                        if (newchs.length > chs.length) {
+                            newchs.push(newchs.pop()+1);
+                        } 
+                        w.toc.move(chs, newchs);
+                        w.ui.toc();
+                    }
+                    w.toc.ui.select(newchs);
+                }
+                return false;
             } else if (e.keyCode == 40) { //down
-                chs = w.toc.ui.down(chs);
-                if (chs !== false) { w.toc.ui.select(chs); }
+                newchs = w.toc.ui.down(chs);
+                if (newchs !== false) {
+                    if (e.shiftKey) {
+                        if (newchs.length < chs.length) {
+                            newchs.push(newchs.pop()+1);
+                        } 
+                        w.toc.move(chs, newchs);
+                        w.ui.toc();
+                    }
+                    w.toc.ui.select(newchs);
+                }
+                return false;
             } else if (e.keyCode == 37) { //left
                 chs = w.toc.ui.left(chs);
                 if (chs !== false) { w.toc.ui.select(chs); }
@@ -593,17 +606,22 @@ $.extend(w.toc, {ui: {
                 w.ui.toc();
                 if (chs !== false) { w.toc.ui.select(chs); }
             } else if (e.keyCode == 46) { //remove
-                chs = w.toc.ui.remove(chs);
-                w.ui.toc();
-                if (chs !== false) { w.toc.ui.select(chs); }
+                if (chs.length == 1 && chs[0] == 1) { return false; }
+                if (confirm("Remove ?")) {
+                    newchs = w.toc.ui.up(chs);
+                    w.toc.ui.remove(chs);
+                    w.ui.toc();
+                    if (newchs !== false) { w.toc.ui.select(newchs); }
+                }
             } else if (e.keyCode == 9) { //tab
                 if (e.shiftKey) {
-                    chs = w.toc.up(w.toc.shc(chs));
+                    chs = w.toc.stab(chs);
                 } else {
-                    chs = w.toc.down(w.toc.shc(chs));
+                    chs = w.toc.tab(chs);
                 }
                 w.ui.toc();
                 if (chs !== false) { w.toc.ui.select(chs); }
+                return false;
             } else {
                 //alert(e.keyCode);
             }

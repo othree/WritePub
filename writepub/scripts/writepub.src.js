@@ -132,17 +132,26 @@ $.extend(w, {
     load: function (id) {
         id = w.idExist(w.safeId(id));
         if (id !== false) {
-            w.setContent(w.loadContent(id));
             var crumbs = {
                 mainpage: {title: 'main page', value: w.book.meta.mainPage}
             };
             if (w.chId(id)) {
-                //crumbs[id] = {title: w.book.meta.toc[id].title};
+                var chs = w.toc.chs(id), ch = w.book.meta.toc.sub;
+                for (var i = 0, len=chs.length; i < len; i++) {
+                    ch = ch[chs[i]];
+                    crumbs[i] = {title: ch.title};
+                    if (i+1 == len) {
+                        id = ch.id;
+                    } else {
+                        ch = ch.sub;
+                    }
+                }
             } else {
                 crumbs[id] = {title: w.meta.frontMatter[id].title};
             }
             w.ui.breadcrumbs(crumbs);
             w.meta.id = id;
+            w.setContent(w.loadContent(id));
         }
     },
     save: function (id) {
@@ -708,9 +717,9 @@ $.extend(w, {ui: {
     tocEvent: function() {
         $('#toc').click(function (e) {
             var uri = $(e.target).attr('href'),
-                id = w.genId(uri);
-            if (id === false) {
                 id = w.idExist($(e.target).attr('id'));
+            if (id === false) {
+                id = w.genId(uri);
             }
             if (id !== false) {
                 w.load(id);
@@ -726,7 +735,7 @@ $.extend(w, {ui: {
             w.ui.toc();
             $('#goto-content').parent().hide();
             $('#backto-main').parent().show();
-            w.load(w.book.meta.toc.sub[1].id);
+            w.load('ch1');
             e.stopPropagation();
             e.preventDefault();
             return false;

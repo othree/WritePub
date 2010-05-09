@@ -572,19 +572,25 @@ $.extend(w.toc, {ui: {
             if (!this.focused) { return false; }
             var target = e.target,
                 chs = w.toc.chs(w.toc.ui.target),
-                ch, newchs;
+                ch, newchs, event;
             if (e.keyCode == 13) { //enter
                 ch = w.toc.getCh(chs);
                 chs.push((ch.sub && ch.sub.length > 1)? ch.sub.length : 1);
                 chs = w.toc.ui.insert(chs);
-                w.ui.toc();
-                w.toc.ui.select(chs);
+                if (chs !== false) {
+                    w.ui.toc();
+                    w.toc.ui.select(chs);
+                    event = jQuery.Event('keydown');
+                    event.keyCode = 32;
+                    $(this).trigger(event);
+                }
             } else if (e.keyCode == 32) { //space
                 ch = w.toc.getCh(chs);
                 w.inplace.show($('#'+w.toc.ui.target), ch.title, function (value) {
                     ch.title = $("#inplace-input", this).val();
                     w.ui.toc();
                     w.toc.ui.select(w.toc.ui.target);
+                    w.saveMeta();
                 }, function () {
                     w.toc.ui.select(w.toc.ui.target);
                 });   
@@ -625,8 +631,13 @@ $.extend(w.toc, {ui: {
                     chs.push(chs.pop()+1);
                 }
                 chs = w.toc.ui.insert(chs);
-                w.ui.toc();
-                if (chs !== false) { w.toc.ui.select(chs); }
+                if (chs !== false) {
+                    w.ui.toc();
+                    w.toc.ui.select(chs);
+                    event = jQuery.Event('keydown');
+                    event.keyCode = 32;
+                    $(this).trigger(event);
+                }
             } else if (e.keyCode == 46) { //remove
                 if (chs.length == 1 && chs[0] == 1) { return false; }
                 if (confirm("Remove ?")) {
@@ -707,6 +718,7 @@ $.extend(w, {ui: {
                 w.inplace.show(this, w.book.meta[meta], function(e) {
                     w.book.meta[meta] = $("#inplace-input", this).val();
                     w.ui.updateHeader();
+                    w.saveMeta();
                 });
                 return false;
             });

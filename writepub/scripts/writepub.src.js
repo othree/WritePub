@@ -591,9 +591,9 @@ $.extend(w.toc, {ui: {
                 newchs = w.toc.ui.down(chs);
                 if (newchs !== false) {
                     if (e.shiftKey) {
-                        if (newchs.length < chs.length) {
-                            newchs.push(newchs.pop()+1);
-                        } 
+                        //if (newchs.length < chs.length) {
+                            //newchs.push(newchs.pop());
+                        //} 
                         w.toc.move(chs, newchs);
                         w.ui.toc();
                     }

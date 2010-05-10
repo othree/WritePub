@@ -608,6 +608,8 @@ $.extend(w.toc, {ui: {
             w.inplace.show(target, ch.title, function (value) {
                 ch.title = $("#inplace-input", this).val();
                 w.ui.toc();
+                w.toc.ui.select(w.toc.ui.target);
+                w.saveMeta();
             }, function () {
                 w.toc.ui.select(w.toc.ui.target);
             });   

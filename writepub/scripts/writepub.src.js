@@ -62,15 +62,19 @@ $.extend(w, {
         if (w.inited) { return false; }
         w.inited = true;
         w.setOptions(options);
-        w.options.mode = document.location.protocol == 'file:' ? 'w' : 'r';
+        w.options.writable = document.location.protocol == 'file:';
+        w.options.mode = w.options.writable ? 'w':'r';
         w.options.path = document.location.pathname.replace(/[^\/]*$/, '');
 
         w.options.debug = (document.location.search.indexOf('debug') > 0);
-        if (w.options.debug) { w.options.mode = 'w'; }
+        if (w.options.debug) {
+            w.options.writable = 'w'; 
+            w.options.mode = 'w'; 
+        }
 
         w.loadMeta();
         w.ui.init(w.options.mode);
-        w.viewport = ('w' == w.options.mode)? w.editor : w.reader;
+        w.switchViewport();
         w.toc.init('#toc');
         w.presentId = w.getInitId();
         w.load(w.presentId);
@@ -223,6 +227,11 @@ $.extend(w, {
             return ajax.status == 200 || ajax.status === 0 ? ajax.responseText : false ;
         // }
     },
+    switchViewport: function () {
+        var mode = w.options.mode;
+        w.viewport = ('w' == w.options.mode)? w.editor : w.reader;
+        w.ui.switchViewport();
+    },
     viewport: null,
     inited: false
 });
@@ -260,7 +269,7 @@ $.extend(w, {reader: {
 $.extend(w, {editor: {
     init: function () {
         if (!w.inited) { return false; }
-        $('#editor').tinymce({
+        $('#editor-area').tinymce({
             script_url : 'writepub/vendor/tinymce/jscripts/tiny_mce/tiny_mce.js',
             // General options
             theme: "advanced",
@@ -291,7 +300,7 @@ $.extend(w, {editor: {
                 }
             }
         });
-        $('#editor').after( save );
+        $('#editor').append( save );
     },
     setContent: function (content) {
         var that = this;
@@ -710,7 +719,7 @@ $.extend(w.toc, {ui: {
     focus: false
 }});
 $.extend(w, {ui: {
-    init: function(mode) {
+    init: function() {
         if (!w.inited || w.ui.inited) { return false; }
         w.ui.inited = true;
         var container = $('#container');
@@ -723,7 +732,9 @@ $.extend(w, {ui: {
         w.ui.toolbar(w.meta.toolbar);
         w.ui.frontMatter();
         w.ui.breadcrumbs(w.options.defaults.crumbs);
-        if ('w' == mode) {
+        w.inplace.init();
+        w.ui.inplaceInit();
+        if (w.options.mode) {
             w.editor.init();
             w.reader.init();
             w.reader.hide();
@@ -731,12 +742,21 @@ $.extend(w, {ui: {
             w.editor.hide();
             w.reader.init();
         }
-        w.inplace.init();
-        w.ui.inplaceInit();
 
         w.ui.tocEvent();
         w.ui.goContentEvent();
         $('#backto-main').parent().hide();
+    },
+    switchViewport: function() {
+        if ('w' == w.options.mode) {
+            w.editor.show();
+            w.reader.hide();
+            w.editor.setContent( w.reader.getContent() );
+        } else {
+            w.editor.hide();
+            w.reader.show();
+            w.reader.setContent( w.editor.getContent() );
+        }
     },
     updateHeader: function() {
         $('#header h1').html(w.book.meta.title);
@@ -855,7 +875,7 @@ $.extend(w, {ui: {
         '        <p><a id="goto-content" href="">'+_('goto content')+'</a></p>' +
         '    </div>' +
         '    <div id="content">' +
-        '        <textarea id="editor"></textarea>' +
+        '        <div id="editor"><textarea id="editor-area"></textarea></div>' +
         '        <div id="reader"></div>' +
         '    </div>' +
         '</div>',

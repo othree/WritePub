@@ -586,6 +586,7 @@ $.extend(w.toc, {ui: {
         return chs;
     },
     select: function(id) {
+        w.inplace.hide();
         if ($.isArray(id)) { id = 'ch'+id.join('-'); }
         if (!w.chId(id)) { return false; }
         $(w.toc.toc).find('a').removeClass('selected');

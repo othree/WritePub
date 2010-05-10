@@ -242,6 +242,12 @@ $.extend(w, {reader: {
         if (!w.editor.inited) { return false; }
         return w.reader._instance.html();
     },
+    show: function () {
+        this._instance.show();
+    },
+    hide: function () {
+        this._instance.hide();
+    },
     inited: false,
     _instance: null
 }});
@@ -249,7 +255,8 @@ $.extend(w, {reader: {
 $.extend(w, {editor: {
     init: function () {
         if (!w.inited) { return false; }
-        $('#editor').tinymce({
+        this._element = $('#editor');
+        this._element.tinymce({
             script_url : 'writepub/vendor/tinymce/jscripts/tiny_mce/tiny_mce.js',
             // General options
             theme: "advanced",
@@ -280,23 +287,33 @@ $.extend(w, {editor: {
                 }
             }
         });
-        $('#editor').after( save );
+        this._element.after( save );
     },
     setContent: function (content) {
+        var that = this;
         if (typeof content != 'string') { return false; }
-        if (w.editor.inited) {
-            w.editor._instance.setContent(content);
+        if (that.inited) {
+            that._instance.setContent(content);
         } else {
             setTimeout(function () {
-                w.editor.setContent(content);
+                that.setContent(content);
             }, 100);
         }
     },
     getContent: function () {
-        if (!w.editor.inited) { return false; }
-        return w.editor._instance.getContent();
+        if (!this.inited) { return false; }
+        return this._instance.getContent();
+    },
+    show: function () {
+        this._element.show();
+        $('#save').show();
+    },
+    hide: function () {
+        this._element.hide();
+        $('#save').hide();
     },
     inited: false,
+    _element: null,
     _instance: null
 }});
 
@@ -826,6 +843,7 @@ $.extend(w, {ui: {
         '    </div>' +
         '    <div id="content">' +
         '        <textarea id="editor"></textarea>' +
+        '        <div id="reader"></div>' +
         '    </div>' +
         '</div>',
     inited: false

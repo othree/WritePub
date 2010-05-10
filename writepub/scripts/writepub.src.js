@@ -66,7 +66,8 @@ $.extend(w, {
         w.options.path = document.location.pathname.replace(/[^\/]*$/, '');
 
         w.loadMeta();
-        w.ui.init();
+        w.ui.init(w.options.mode);
+        w.viewport = ('w' == w.options.mode)? w.editor : w.reader;
         w.toc.init('#toc');
         w.presentId = w.getInitId();
         w.load(w.presentId);
@@ -190,7 +191,7 @@ $.extend(w, {
     },
     setContent: function (content) {
         if (typeof content == 'string') {
-            w.editor.setContent(content);
+            w.viewport.setContent(content);
             return true;
         } else {
             return false;
@@ -219,6 +220,7 @@ $.extend(w, {
             return ajax.status == 200 || ajax.status === 0 ? ajax.responseText : false ;
         // }
     },
+    viewport: null,
     inited: false
 });
 
@@ -255,8 +257,7 @@ $.extend(w, {reader: {
 $.extend(w, {editor: {
     init: function () {
         if (!w.inited) { return false; }
-        this._element = $('#editor');
-        this._element.tinymce({
+        $('#editor').tinymce({
             script_url : 'writepub/vendor/tinymce/jscripts/tiny_mce/tiny_mce.js',
             // General options
             theme: "advanced",
@@ -287,7 +288,7 @@ $.extend(w, {editor: {
                 }
             }
         });
-        this._element.after( save );
+        $('#editor').after( save );
     },
     setContent: function (content) {
         var that = this;
@@ -305,15 +306,14 @@ $.extend(w, {editor: {
         return this._instance.getContent();
     },
     show: function () {
-        this._element.show();
+        $('#editor').show();
         $('#save').show();
     },
     hide: function () {
-        this._element.hide();
+        $('#editor').hide();
         $('#save').hide();
     },
     inited: false,
-    _element: null,
     _instance: null
 }});
 
@@ -704,7 +704,7 @@ $.extend(w.toc, {ui: {
     focus: false
 }});
 $.extend(w, {ui: {
-    init: function() {
+    init: function(mode) {
         if (!w.inited || w.ui.inited) { return false; }
         w.ui.inited = true;
         var container = $('#container');
@@ -717,7 +717,14 @@ $.extend(w, {ui: {
         w.ui.toolbar(w.meta.toolbar);
         w.ui.frontMatter();
         w.ui.breadcrumbs(w.options.defaults.crumbs);
-        w.editor.init();
+        if ('w' == mode) {
+            w.editor.init();
+            w.reader.init();
+            w.reader.hide();
+        } else {
+            w.editor.hide();
+            w.reader.init();
+        }
         w.inplace.init();
         w.ui.inplaceInit();
 

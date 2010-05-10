@@ -65,6 +65,9 @@ $.extend(w, {
         w.options.mode = document.location.protocol == 'file:' ? 'w' : 'r';
         w.options.path = document.location.pathname.replace(/[^\/]*$/, '');
 
+        w.options.debug = (document.location.search.indexOf('debug') > 0);
+        if (w.options.debug) { w.options.mode = 'w'; }
+
         w.loadMeta();
         w.ui.init(w.options.mode);
         w.viewport = ('w' == w.options.mode)? w.editor : w.reader;

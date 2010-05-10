@@ -222,9 +222,33 @@ $.extend(w, {
     inited: false
 });
 
+$.extend(w, {reader: {
+    init: function () {
+        if (!w.inited) { return false; }
+        this.inited = true;
+        this._instance = $('#reader');
+    },
+    setContent: function (content) {
+        if (typeof content != 'string') { return false; }
+        if (w.reader.inited) {
+            w.reader._instance.html(content);
+        } else {
+            setTimeout(function () {
+                w.reader.html(content);
+            }, 100);
+        }
+    },
+    getContent: function () {
+        if (!w.editor.inited) { return false; }
+        return w.reader._instance.html();
+    },
+    inited: false,
+    _instance: null
+}});
+
 $.extend(w, {editor: {
     init: function () {
-        if (w.editor.inited) { return false; }
+        if (!w.inited) { return false; }
         $('#editor').tinymce({
             script_url : 'writepub/vendor/tinymce/jscripts/tiny_mce/tiny_mce.js',
             // General options

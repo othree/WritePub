@@ -243,6 +243,19 @@ window.writepub = w;
 
 (function (w) {
 
+$.extend(w, {page: {
+    init: function () {
+        if (!w.inited) { return false; }
+        this.inited = true;
+    },
+    inited: false
+}});
+
+})(writepub);
+/*global writepub _ tinyMCE saveFile loadFile convertUnicodeToFileFormat config */
+
+(function (w) {
+
 $.extend(w, {reader: {
     init: function () {
         if (!w.inited) { return false; }

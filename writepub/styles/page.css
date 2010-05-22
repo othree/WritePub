@@ -1,0 +1,36 @@
+body {
+    background: #aaa;
+}
+#content {
+    display: none;
+}
+.paper {
+    margin: 1em auto;
+    width: 25em;
+    height: 40em;
+    background: #fefefe;
+    -moz-box-shadow: 5px 5px 5px #333;
+    -webkit-box-shadow: 5px 5px 5px #333;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    position: relative;
+}
+.page {
+    position: relative;
+    top: 1em;
+    left: 1em;
+    width: 23em;
+    overflow: hidden;
+}
+
+h1 {
+    font-size: 150%;
+}
+
+#myNicPanel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}

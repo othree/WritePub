@@ -29,10 +29,8 @@
                 content.prependTo(nextPage);
                 height = page.height();
                 if (height > pageHeight) {
-                    console.log(nextPage);
-                   // reflowPage( page );
+                   reflowPage( page );
                 } else {
-                    console.log('b');
                     reflowPage( nextPage );
                 }
                 return true;

@@ -11,7 +11,73 @@
         return page;
     }
 
-    //var page = newPage();
+    function findAnchor (anchor, offset) {
+        var i,
+            elem,
+            result;
+        for (i in anchor.childNodes) {
+            elem = anchor.childNodes[i];
+            if (elem.nodeType == 3) {
+                if (elem.length > offset) { return [elem, offset]; }
+                else { offset -= elem.length; }
+            } else if (elem.nodeType == 1) {
+                result = findAnchor(elem, offset);
+                if (typeof result == "number") {
+                    offset = result;
+                } else {
+                    return result;
+                }
+            }
+        }
+        return offset;
+    }
+
+    function reflowElement (page, element) {
+        var r = document.createRange(),
+            startAnchor = element,
+            endAnchor,
+            endOffset,
+            offset = 0,
+            content,
+            height,
+            flag = false,
+            last = false;
+        r.setStartBefore(element);
+        while(flag === false) {
+            offset += 16;
+            endAnchor = findAnchor(startAnchor, offset);
+            r.setEnd(endAnchor[0], endAnchor[1]);
+            content = r.cloneContents();
+            page.append(content);
+            height = page.height();
+            if (height > pageHeight) {
+                flag = true;
+                offset -= 16;
+            }
+            page.find('> *:last').remove();
+        }
+        flag = false;
+        while(flag === false) {
+            offset += 1;
+            endAnchor = findAnchor(startAnchor, offset);
+            r.setEnd(endAnchor[0], endAnchor[1]);
+            content = $(r.cloneContents());
+            page.append(content);
+            height = page.height();
+            if (last === true) {
+                flag = true;
+                r.deleteContents();
+            } else if (height > pageHeight) {
+                offset -= 2;
+                last = true;
+                page.find('> *:last').remove();
+            } else {
+                page.find('> *:last').remove();
+            }
+        }
+
+
+    }
 
     function reflowPage (page, context) {
         if (page.children().length === 0) {
@@ -21,7 +87,7 @@
                 content,
                 nextPage;
             if (height > pageHeight) {
-                content = page.find(':last-child');
+                content = page.find('> *:last');
                 nextPage = $(page).parent('.paper').next('.paper').find('.page');
                 if (nextPage.length === 0) {
                     nextPage = newPage(context);
@@ -29,23 +95,24 @@
                 content.prependTo(nextPage);
                 height = page.height();
                 if (height > pageHeight) {
-                   reflowPage( page );
+                    reflowPage( page, context );
                 } else {
-                    reflowPage( nextPage );
+                    reflowElement( page, nextPage.find('> *:first')[0] );
+                    reflowPage( nextPage, context );
                 }
                 return true;
             } else if (height < pageHeight) {
                 nextPage = $(page).parent('.paper').next('.paper').find('.page');
                 if (nextPage.length !== 0) {
-                    content = nextPage.find(':first-child');
+                    content = nextPage.find('> *:first');
                     if (content.length !== 0) {
                         content.appendTo(page);
                         height = page.height();
                         if (height > pageHeight) {
                             content.prependTo(nextPage);
                         } else {
-                            reflowPage( nextPage );
-                            reflowPage( page );
+                            reflowPage( nextPage, context );
+                            reflowPage( page, context );
                         }
                     }
                 }
@@ -73,7 +140,7 @@
 
     $.fn.page = function (newPageCB) {
         var that = this;
-        $('*', that).each(function () {
+        $('> *', that).each(function () {
             addContent($(this), that, newPageCB);
         });
         $(this).bind({'keydown click': reflow});

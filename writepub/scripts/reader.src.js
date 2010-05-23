@@ -12,9 +12,11 @@ $.extend(w, {reader: {
         if (typeof content != 'string') { return false; }
         if (w.reader.inited) {
             w.reader._instance.html(content);
+            w.reader._instance.page();
         } else {
             setTimeout(function () {
-                w.reader.html(content);
+                w.reader._instance.html(content);
+                w.reader._instance.page();
             }, 100);
         }
     },

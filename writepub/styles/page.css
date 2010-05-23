@@ -1,13 +1,8 @@
-body {
-    background: #aaa;
-}
-#content {
-    display: none;
-}
 .paper {
     margin: 1em auto;
-    width: 25em;
-    height: 40em;
+    border: 1px solid black;
+    width: 18em;
+    height: 28em;
     background: #fefefe;
     -moz-box-shadow: 5px 5px 5px #333;
     -webkit-box-shadow: 5px 5px 5px #333;
@@ -19,7 +14,7 @@ body {
     position: relative;
     top: 1em;
     left: 1em;
-    width: 23em;
+    width: 16em;
     overflow: hidden;
 }
 

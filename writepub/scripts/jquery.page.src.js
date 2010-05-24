@@ -46,6 +46,10 @@
         while(flag === false) {
             offset += 16;
             endAnchor = findAnchor(startAnchor, offset);
+            if (typeof endAnchor == "number") { 
+                offset -= 16;
+                break;
+            }
             r.setEnd(endAnchor[0], endAnchor[1]);
             content = r.cloneContents();
             page.append(content);
@@ -60,6 +64,10 @@
         while(flag === false) {
             offset += 1;
             endAnchor = findAnchor(startAnchor, offset);
+            if (typeof endAnchor == "number") { 
+                offset -= 1;
+                break;
+            }
             r.setEnd(endAnchor[0], endAnchor[1]);
             content = $(r.cloneContents());
             page.append(content);

@@ -133,3 +133,7 @@ a:hover {
     padding: 2px;
     background: #9f9; 
 }
+
+.page p {
+    font-size: 70%;
+}

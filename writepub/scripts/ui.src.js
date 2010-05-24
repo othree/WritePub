@@ -35,7 +35,7 @@ $.extend(w, {ui: {
         if ('w' == w.options.mode) {
             w.editor.show();
             w.reader.hide();
-            w.editor.setContent( w.reader.getContent() );
+            //w.editor.setContent( w.reader.getContent() );
         } else {
             w.editor.hide();
             w.reader.show();

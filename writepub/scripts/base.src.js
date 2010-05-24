@@ -74,7 +74,7 @@ $.extend(w, {
 
         w.loadMeta();
         w.ui.init(w.options.mode);
-        w.switchViewport();
+        w.switchViewport(w.options.mode);
         w.toc.init('#toc');
         w.presentId = w.getInitId();
         w.load(w.presentId);
@@ -199,6 +199,9 @@ $.extend(w, {
     setContent: function (content) {
         if (typeof content == 'string') {
             w.viewport.setContent(content);
+            if (w.options.mode == 'r' && w.options.writable == 'w') {
+                w.editor.setContent(content);
+            }
             return true;
         } else {
             return false;
@@ -227,8 +230,12 @@ $.extend(w, {
             return ajax.status == 200 || ajax.status === 0 ? ajax.responseText : false ;
         // }
     },
-    switchViewport: function () {
-        var mode = w.options.mode;
+    switchViewport: function (mode) {
+        if (mode) {
+            w.options.mode = mode;
+        } else {
+            w.options.mode = ('w' == w.options.mode)? 'r' : 'w';
+        }
         w.viewport = ('w' == w.options.mode)? w.editor : w.reader;
         w.ui.switchViewport();
     },

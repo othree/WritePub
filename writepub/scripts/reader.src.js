@@ -11,7 +11,8 @@ $.extend(w, {reader: {
     setContent: function (content) {
         if (typeof content != 'string') { return false; }
         if (w.reader.inited) {
-            w.reader._instance.html(content);
+            w.reader._instance.dePage();
+            w.reader._instance.empty().html(content);
             w.reader._instance.page();
         } else {
             setTimeout(function () {

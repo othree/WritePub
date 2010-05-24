@@ -154,4 +154,9 @@
         $(this).bind({'keydown click': reflow});
     };
 
+    $.fn.dePage = function () {
+        $(this).unbind({'keydown click': reflow});
+    };
+
+
 })();

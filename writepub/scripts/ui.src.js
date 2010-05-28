@@ -54,7 +54,7 @@ $.extend(w, {ui: {
     },
     toolbar: function(tools) {
         if (!w.ui.inited) { return false; }
-        w.ui.fillList($('#toolbar'), tools);
+        w.ui.fillList($('#toolbar'), tools, function (id) { return '#'+id; });
     },
     frontMatter: function() {
         if (!w.ui.inited) { return false; }
@@ -125,13 +125,14 @@ $.extend(w, {ui: {
             return false;
         });
     },
-    fillList: function(list, items) {
+    fillList: function(list, items, parseLink) {
         if (!w.ui.inited) { return false; }
+        parseLink = $.isFunction(parseLink) ? parseLink : function (id) { return w.genFilePath(id); } ;
         var html = '';
         for (var id in items) {
             id = w.idExist(w.safeId(id));
             if (id !== false) {
-                html += '<li><a href="'+w.genFilePath(id)+'">'+_(items[id].title)+'</a></li>';
+                html += '<li><a href="'+parseLink(id)+'">'+_(items[id].title)+'</a></li>';
             }
         }
         list.html(html);

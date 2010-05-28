@@ -2,7 +2,7 @@
 
 (function () {
 
-    var pageHeight = 16*(28-2);
+    var pageHeight = 400;
 
     function newPage (context, cb) {
         this.count = ++this.count || 1;

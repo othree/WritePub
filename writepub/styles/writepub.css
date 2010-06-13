@@ -48,6 +48,9 @@ h1 {
     line-height: 2em;
 }
 #breadcrumbs li:after {
+    display: block;
+    float: right;
+    padding: 0 0 0 8px;
     content: ' > ';
 }
 #breadcrumbs li:last-of-type:after {
@@ -118,6 +121,8 @@ h1 {
 }
 #save {
     margin: 4px;
+    padding: 0 4px;
+    line-height: 24px;
 }
 #inplace {
     position: absolute;

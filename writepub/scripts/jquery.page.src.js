@@ -34,7 +34,8 @@
     }
 
     function reflowElement (page, element) {
-        var r = document.createRange(),
+        var doc = element.ownerDocument,
+            r = doc.createRange && doc.createRange(),
             startAnchor = element,
             endAnchor,
             endOffset,
@@ -43,6 +44,7 @@
             height,
             flag = false,
             last = false;
+        if (!r) { return; }
         r.setStartBefore(element);
         while(flag === false) {
             offset += 30;

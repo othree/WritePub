@@ -1172,8 +1172,8 @@ default formatting logic for execCommand due to it's inconsistant and buggy beha
 <description>Optional node to remove the format from defaults to current selection.</description>
 </param>
 </method>
-<method name="toggle" summary="Toggles the specifed format on/off.">
-<description>Toggles the specifed format on/off.
+<method name="toggle" summary="Toggles the specified format on/off.">
+<description>Toggles the specified format on/off.
 </description>
 <param name="name" type="String">
 <description>Name of format to apply/remove.</description>
@@ -1197,9 +1197,15 @@ default formatting logic for execCommand due to it's inconsistant and buggy beha
 <param name="vars" type="Object">
 <description>Optional list of variables to replace before checking it.</description>
 </param>
+<param name="similar" type="Boolean">
+<description>Match format that has similar properties.</description>
+</param>
+<return type="Object">
+<description>Returns the format object it matches or undefined if it doesn't match.</description>
+</return>
 </method>
-<method name="match" summary="Matches the current selection or specifed node against the specified format name.">
-<description>Matches the current selection or specifed node against the specified format name.
+<method name="match" summary="Matches the current selection or specified node against the specified format name.">
+<description>Matches the current selection or specified node against the specified format name.
 </description>
 <param name="name" type="String">
 <description>Name of format to match.</description>
@@ -1212,6 +1218,19 @@ default formatting logic for execCommand due to it's inconsistant and buggy beha
 </param>
 <return type="boolean">
 <description>true/false if the specified selection/node matches the format.</description>
+</return>
+</method>
+<method name="matchAll" summary="Matches the current selection against the array of formats and returns a new array with matching formats.">
+<description>Matches the current selection against the array of formats and returns a new array with matching formats.
+</description>
+<param name="names" type="Array">
+<description>Name of format to match.</description>
+</param>
+<param name="vars" type="Object">
+<description>Optional list of variables to replace before checking it.</description>
+</param>
+<return type="Array">
+<description>Array with matched formats.</description>
 </return>
 </method>
 <method name="canApply" summary="Returns true/false if the specified format can be applied to the current selection or not.">
@@ -1227,15 +1246,9 @@ default formatting logic for execCommand due to it's inconsistant and buggy beha
 </members>
 </class>
 <class fullname="tinymce.UndoManager" name="UndoManager" summary="This class handles the undo/redo history levels for the editor.">
-<description>This class handles the undo/redo history levels for the editor. Since the build in undo/redo has major drawbacks a custom one was needed.</description>
-<members>
-<method constructor="true" name="UndoManager" summary="Constructs a new UndoManager instance.">
-<description>Constructs a new UndoManager instance.
+<description>This class handles the undo/redo history levels for the editor. Since the build in undo/redo has major drawbacks a custom one was needed.
 </description>
-<param name="ed" type="tinymce.Editor">
-<description>Editor instance to undo/redo in.</description>
-</param>
-</method>
+<members>
 <method name="add" summary="Adds a new undo level/snapshot to the undo list.">
 <description>Adds a new undo level/snapshot to the undo list.
 </description>
@@ -1548,13 +1561,13 @@ on more complex patterns.
 <method name="remove" summary="Removes/deletes the specified element(s) from the DOM.">
 <description>Removes/deletes the specified element(s) from the DOM.
 </description>
-<param name="n">
+<param name="node">
 <type fullname="String"/>
 <type fullname="Element"/>
 <type fullname="Array"/>
 <description>ID of element or DOM element object or array containing multiple elements/ids.</description>
 </param>
-<param name="k" type="Boolean">
+<param name="keep_children" type="Boolean">
 <description>Optional state to keep children or not. If set to true all children will be placed at the location of the removed element.</description>
 </param>
 <return>
@@ -1591,7 +1604,7 @@ or the CSS style name like background-color.
 <param name="na" type="String">
 <description>Style name to return.</description>
 </param>
-<param name="c" type="String">
+<param name="c" type="Boolean">
 <description>Computed style.</description>
 </param>
 <return type="String">
@@ -1876,10 +1889,10 @@ a converted value into a separate attribute with the mce prefix like _mce_src or
 <method name="insertAfter" summary="Inserts a element after the reference element.">
 <description>Inserts a element after the reference element.
 </description>
-<param name="Element" type="Element">
-<description>to insert after the reference.</description>
+<param name="node" type="Element">
+<description>Element to insert after the reference.</description>
 </param>
-<param name="r">
+<param name="reference_node">
 <type fullname="Element"/>
 <type fullname="String"/>
 <type fullname="Array"/>
@@ -4190,6 +4203,10 @@ The current keys are longname, author, authorurl, infourl and version.
 </property>
 <property final="true" name="isAir" static="true" summary="Constant that is true if the runtime is Adobe Air." type="Boolean">
 <description>Constant that is true if the runtime is Adobe Air.
+</description>
+</property>
+<property final="true" name="isIDevice" static="true" summary="Constant that tells if the current browser is an iPhone or iPad." type="Boolean">
+<description>Constant that tells if the current browser is an iPhone or iPad.
 </description>
 </property>
 <method name="is" static="true" summary="Checks if a object is of a specific type for example an array.">

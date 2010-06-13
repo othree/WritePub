@@ -485,25 +485,34 @@ tinymce.Formatter.prototype.remove = function(name, vars, node) {
 }
 
 tinymce.Formatter.prototype.toggle = function(name, vars, node) {
-	/// <summary>Toggles the specifed format on/off.</summary>
+	/// <summary>Toggles the specified format on/off.</summary>
 	/// <param name="name" type="String">Name of format to apply/remove.</param>
 	/// <param name="vars" type="Object">Optional list of variables to replace within format before applying/removing it.</param>
 	/// <param name="node" type="Node">Optional node to apply the format to or remove from. Defaults to current selection.</param>
 }
 
-tinymce.Formatter.prototype.matchNode = function(node, name, vars) {
+tinymce.Formatter.prototype.matchNode = function(node, name, vars, similar) {
 	/// <summary>Return true/false if the specified node has the specified format.</summary>
 	/// <param name="node" type="Node">Node to check the format on.</param>
 	/// <param name="name" type="String">Format name to check.</param>
 	/// <param name="vars" type="Object">Optional list of variables to replace before checking it.</param>
+	/// <param name="similar" type="Boolean">Match format that has similar properties.</param>
+	/// <returns type="Object">Returns the format object it matches or undefined if it doesn't match.</returns>
 }
 
 tinymce.Formatter.prototype.match = function(name, vars, node) {
-	/// <summary>Matches the current selection or specifed node against the specified format name.</summary>
+	/// <summary>Matches the current selection or specified node against the specified format name.</summary>
 	/// <param name="name" type="String">Name of format to match.</param>
 	/// <param name="vars" type="Object">Optional list of variables to replace before checking it.</param>
 	/// <param name="node" type="Node">Optional node to check.</param>
 	/// <returns type="boolean">true/false if the specified selection/node matches the format.</returns>
+}
+
+tinymce.Formatter.prototype.matchAll = function(names, vars) {
+	/// <summary>Matches the current selection against the array of formats and returns a new array with matching formats.</summary>
+	/// <param name="names" type="Array">Name of format to match.</param>
+	/// <param name="vars" type="Object">Optional list of variables to replace before checking it.</param>
+	/// <returns type="Array">Array with matched formats.</returns>
 }
 
 tinymce.Formatter.prototype.canApply = function(name) {
@@ -512,9 +521,8 @@ tinymce.Formatter.prototype.canApply = function(name) {
 	/// <returns type="boolean">true/false if the specified format can be applied to the current selection/node.</returns>
 }
 
-tinymce.UndoManager = function(ed) {
+tinymce.UndoManager = function() {
 	/// <summary>This class handles the undo/redo history levels for the editor.</summary>
-	/// <param name="ed" type="tinymce.Editor">Editor instance to undo/redo in.</param>
 }
 
 tinymce.UndoManager.prototype.add = function(l) {
@@ -673,10 +681,10 @@ tinymce.dom.DOMUtils.prototype.createHTML = function(n, a, h) {
 	/// <returns type="String">String with new HTML element like for example: <a href="#">test</a>.</returns>
 }
 
-tinymce.dom.DOMUtils.prototype.remove = function(n, k) {
+tinymce.dom.DOMUtils.prototype.remove = function(node, keep_children) {
 	/// <summary>Removes/deletes the specified element(s) from the DOM.</summary>
-	/// <param name="n" type="">ID of element or DOM element object or array containing multiple elements/ids.</param>
-	/// <param name="k" type="Boolean">Optional state to keep children or not. If set to true all children will be placed at the location of the removed element.</param>
+	/// <param name="node" type="">ID of element or DOM element object or array containing multiple elements/ids.</param>
+	/// <param name="keep_children" type="Boolean">Optional state to keep children or not. If set to true all children will be placed at the location of the removed element.</param>
 	/// <returns type="">HTML DOM element that got removed or array of elements depending on input.</returns>
 }
 
@@ -691,7 +699,7 @@ tinymce.dom.DOMUtils.prototype.getStyle = function(n, na, c) {
 	/// <summary>Returns the current style or runtime/computed value of a element.</summary>
 	/// <param name="n" type="">HTML element or element id string to get style from.</param>
 	/// <param name="na" type="String">Style name to return.</param>
-	/// <param name="c" type="String">Computed style.</param>
+	/// <param name="c" type="Boolean">Computed style.</param>
 	/// <returns type="String">Current style or computed style value of a element.</returns>
 }
 
@@ -827,10 +835,10 @@ tinymce.dom.DOMUtils.prototype.encode = function(s) {
 	/// <returns type="String">Entity encoded string.</returns>
 }
 
-tinymce.dom.DOMUtils.prototype.insertAfter = function(Element, r) {
+tinymce.dom.DOMUtils.prototype.insertAfter = function(node, reference_node) {
 	/// <summary>Inserts a element after the reference element.</summary>
-	/// <param name="Element" type="Element" domElement="true">to insert after the reference.</param>
-	/// <param name="r" type="">Reference element, element id or array of elements to insert after.</param>
+	/// <param name="node" type="Element" domElement="true">Element to insert after the reference.</param>
+	/// <param name="reference_node" type="">Reference element, element id or array of elements to insert after.</param>
 	/// <returns type="">Element that got added or an array with elements.</returns>
 }
 
@@ -2527,6 +2535,7 @@ tinymce.isIE6 = new Boolean();
 tinymce.isGecko = new Boolean();
 tinymce.isMac = new Boolean();
 tinymce.isAir = new Boolean();
+tinymce.isIDevice = new Boolean();
 tinymce.onAddEditor = new tinymce.util.Dispatcher();
 tinymce.onRemoveEditor = new tinymce.util.Dispatcher();
 tinymce.prototype.init = function(s) {

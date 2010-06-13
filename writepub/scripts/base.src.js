@@ -18,6 +18,7 @@ $.extend(w, {
     meta: {
         toolbar: {
             read: {title: 'read'},
+            write: {title: 'write'},
             zoom: {title: 'zoom'},
             download: {title: 'download'},
             about: {title: 'about'}
@@ -189,7 +190,7 @@ $.extend(w, {
     loadContent: function (id) {
         var filePath = w.genFilePath(id),
             content = w.loadFile(filePath);
-        content = (content === false)? '['+_('No contents')+']' : content ;
+        content = (content === false)? '<p>['+_('No contents')+']</p>' : content ;
         return content;
     },
     saveContent: function (id, content) {

@@ -4,6 +4,7 @@ lang = {
     'back to main': '回到主頁',
     'goto content': '直接進入內文',
     'read': '閱讀',
+    'write': '編輯',
     'zoom': '縮放',
     'download': '下載',
     'about': '關於',

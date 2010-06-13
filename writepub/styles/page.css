@@ -1,8 +1,8 @@
 .paper {
     margin: 1em auto;
     border: 1px solid black;
-    width: 18em;
-    height: 28em;
+    width: 448px;
+    height: 460px;
     background: #fefefe;
     -moz-box-shadow: 5px 5px 5px #333;
     -webkit-box-shadow: 5px 5px 5px #333;
@@ -12,20 +12,44 @@
 }
 .page {
     position: relative;
-    top: 1em;
-    left: 1em;
-    width: 16em;
-    overflow: hidden;
+    top: 14px;
+    left: 14px;
+    width: 420px;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+* {
+    font-family: 'Microsoft JhengHei', verdana, arial, sans-serif;
+}
+
+p {
+    font-size: 14px;
+    margin-bottom: 0.5em;
 }
 
 h1 {
-    font-size: 150%;
+    font-size: 180%;
+    margin: 0.5em 0;
 }
 
-#myNicPanel {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    z-index: 100;
+h2 {
+    font-size: 150%;
+    margin: 0.5em 0;
+}
+h3 {
+    font-size: 130%;
+    margin: 0.5em 0;
+}
+h4 {
+    font-size: 120%;
+    margin: 0.5em 0;
+}
+h5 {
+    font-size: 110%;
+    margin: 0.5em 0;
+}
+h6 {
+    font-size: 100%;
+    margin: 0.5em 0;
 }

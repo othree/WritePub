@@ -2,7 +2,8 @@
 
 (function () {
 
-    var pageHeight = 400;
+    var pageHeight = 432,
+        win;
 
     function newPage (context, cb) {
         this.count = ++this.count || 1;
@@ -44,10 +45,10 @@
             last = false;
         r.setStartBefore(element);
         while(flag === false) {
-            offset += 16;
+            offset += 30;
             endAnchor = findAnchor(startAnchor, offset);
             if (typeof endAnchor == "number") { 
-                offset -= 16;
+                offset -= 30;
                 break;
             }
             r.setEnd(endAnchor[0], endAnchor[1]);
@@ -56,7 +57,7 @@
             height = page.height();
             if (height > pageHeight) {
                 flag = true;
-                offset -= 16;
+                offset -= 30;
             }
             page.find('> *:last').remove();
         }
@@ -129,11 +130,14 @@
         return false;
     }
 
-    function reflow () {
+    function reflow (context) {
         setTimeout(function () {
-            var anchor = $(window.getSelection().anchorNode);
+            var anchor = $(win.getSelection().anchorNode);
             var page = anchor.parents('.page');
-            reflowPage(page);
+            $(context).find('.paper .paper').each(function () {
+                $(this).find('.page > *').insertBefore(this);
+            }).remove();
+            reflowPage(page, context);
         }, 1);
     }
 
@@ -146,12 +150,22 @@
         reflowPage(page, context);
     }
 
-    $.fn.page = function (newPageCB) {
-        var that = this;
+    $.fn.page = function (customWin, newPageCB) {
+        var that = this[0] || this;
+        win = customWin || window;
+        $(that).find('.paper, .page').each(function () {
+            $(this).find('.page > *').insertBefore(this);
+        }).remove();
         $('> *', that).each(function () {
-            addContent($(this), that, newPageCB);
+            var elem = this;
+            addContent($(elem), that, newPageCB);
         });
-        $(this).bind({'keydown click': reflow});
+        //$(that).bind({'keypress click': function () {
+            //reflow(that);
+        //}});
+        return function () {
+            reflow(that);
+        };
     };
 
     $.fn.dePage = function () {

@@ -480,6 +480,12 @@
 			if (!t.getElement())
 				return;
 
+			// Is a iPad/iPhone, then skip initialization. We need to sniff here since the
+			// browser says it has contentEditable support but there is no visible caret
+			// We will remove this check ones Apple implements full contentEditable support
+			if (tinymce.isIDevice)
+				return;
+
 			// Add hidden input for non input elements inside form elements
 			if (!/TEXTAREA|INPUT/i.test(t.getElement().nodeName) && s.hidden_input && DOM.getParent(id, 'form'))
 				DOM.insertAfter(DOM.create('input', {type : 'hidden', name : id}), id);
@@ -916,18 +922,19 @@
 				hilitecolor : {inline : 'span', styles : {backgroundColor : '%value'}},
 				fontname : {inline : 'span', styles : {fontFamily : '%value'}},
 				fontsize : {inline : 'span', styles : {fontSize : '%value'}},
-				blockquote : {block : 'blockquote', wrapper : 1},
+				fontsize_class : {inline : 'span', attributes : {'class' : '%value'}},
+				blockquote : {block : 'blockquote', wrapper : 1, remove : 'all'},
 
 				removeformat : [
 					{selector : 'b,strong,em,i,font,u,strike', remove : 'all', split : true, expand : false, block_expand : true, deep : true},
 					{selector : 'span', attributes : ['style', 'class'], remove : 'empty', split : true, expand : false, deep : true},
-					{selector : '*', attributes : ['style', 'class'], expand : false, deep : true}
+					{selector : '*', attributes : ['style', 'class'], split : false, expand : false, deep : true}
 				]
 			});
 
 			// Register default block formats
 			each('p h1 h2 h3 h4 h5 h6 div address pre div code dt dd samp'.split(/\s/), function(name) {
-				t.formatter.register(name, {block : name});
+				t.formatter.register(name, {block : name, remove : 'all'});
 			});
 
 			// Register user defined formats
@@ -1321,14 +1328,27 @@
 		 * @param {Boolean} sf Skip DOM focus. Just set is as the active editor.
 		 */
 		focus : function(sf) {
-			var oed, t = this, ce = t.settings.content_editable;
+			var oed, t = this, ce = t.settings.content_editable, ieRng, controlElm, doc = t.getDoc();
 
 			if (!sf) {
-				// Is not content editable or the selection is outside the area in IE
-				// the IE statement is needed to avoid bluring if element selections inside layers since
-				// the layer is like it's own document in IE
-				if (!ce && (!isIE || t.selection.getNode().ownerDocument != t.getDoc()))
+				// Get selected control element
+				ieRng = t.selection.getRng();
+				if (ieRng.item) {
+					controlElm = ieRng.item(0);
+				}
+
+				// Is not content editable
+				if (!ce)
 					t.getWin().focus();
+
+				// Restore selected control element
+				// This is needed when for example an image is selected within a
+				// layer a call to focus will then remove the control selection
+				if (controlElm && controlElm.ownerDocument == doc) {
+					ieRng = doc.body.createControlRange();
+					ieRng.addElement(controlElm);
+					ieRng.select();
+				}
 
 				// #ifdef contentEditable
 
@@ -1459,7 +1479,7 @@
 		 * @param {Object} o Optional object to pass along for the node changed event.
 		 */
 		nodeChanged : function(o) {
-			var t = this, s = t.selection, n = s.getNode() || t.getBody();
+			var t = this, s = t.selection, n = (isIE ? s.getNode() : s.getStart()) || t.getBody();
 
 			// Fix for bug #1896577 it seems that this can not be fired while the editor is loading
 			if (t.initialized) {
@@ -2370,7 +2390,7 @@
 
 			// Add node change handlers
 			t.onMouseUp.add(t.nodeChanged);
-			t.onClick.add(t.nodeChanged);
+			//t.onClick.add(t.nodeChanged);
 			t.onKeyUp.add(function(ed, e) {
 				var c = e.keyCode;
 
@@ -2391,11 +2411,9 @@
 				}
 
 				// Add default shortcuts for gecko
-				if (isGecko) {
-					t.addShortcut('ctrl+b', t.getLang('bold_desc'), 'Bold');
-					t.addShortcut('ctrl+i', t.getLang('italic_desc'), 'Italic');
-					t.addShortcut('ctrl+u', t.getLang('underline_desc'), 'Underline');
-				}
+				t.addShortcut('ctrl+b', t.getLang('bold_desc'), 'Bold');
+				t.addShortcut('ctrl+i', t.getLang('italic_desc'), 'Italic');
+				t.addShortcut('ctrl+u', t.getLang('underline_desc'), 'Underline');
 
 				// BlockFormat shortcuts keys
 				for (i=1; i<=6; i++)
@@ -2546,6 +2564,55 @@
 				});
 
 				t.onKeyDown.add(function(ed, e) {
+					var rng, tmpRng, parent, offset;
+
+					// IE has a really odd bug where the DOM might include an node that doesn't have
+					// a proper structure. If you try to access nodeValue it would throw an illegal value exception.
+					// This seems to only happen when you delete contents and it seems to be avoidable if you refresh the element
+					// after you delete contents from it. See: #3008923
+					if (isIE && e.keyCode == 46) {
+						rng = t.selection.getRng();
+
+						if (rng.parentElement) {
+							parent = rng.parentElement();
+
+							// Get the current caret position within the element
+							tmpRng = rng.duplicate();
+							tmpRng.moveToElementText(parent);
+							tmpRng.setEndPoint('EndToEnd', rng);
+							offset = tmpRng.text.length;
+
+							// Select next word when ctrl key is used in combo with delete
+							if (e.ctrlKey) {
+								rng.moveEnd('word', 1);
+								rng.select();
+							}
+
+							// Delete contents
+							t.selection.getSel().clear();
+
+							// Check if we are within the same parent
+							if (rng.parentElement() == parent) {
+								try {
+									// Update the HTML and hopefully it will remove the artifacts
+									parent.innerHTML = parent.innerHTML;
+								} catch (ex) {
+									// And since it's IE it can sometimes produce an unknown runtime error
+								}
+
+								// Restore the caret position
+								tmpRng.moveToElementText(parent);
+								tmpRng.collapse();
+								tmpRng.move('character', offset);
+								tmpRng.select();
+							}
+
+							// Block the default delete behavior since it might be broken
+							e.preventDefault();
+							return;
+						}
+					}
+
 					// Is caracter positon keys
 					if ((e.keyCode >= 33 && e.keyCode <= 36) || (e.keyCode >= 37 && e.keyCode <= 40) || e.keyCode == 13 || e.keyCode == 45) {
 						if (t.undoManager.typing)

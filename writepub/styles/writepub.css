@@ -1,3 +1,8 @@
+html, body {
+    font-family: 'Microsoft JhengHei', verdana, arial, sans-serif;
+    background-image: url('../images/bg.png');
+}
+
 body {
     text-align: center;
 }
@@ -5,10 +10,15 @@ body {
     width: 960px;
     margin: 0 auto;
     text-align: left;
+    border: 1px solid #68a;
+    border-width: 0 1px 1px;
+    background: #fff;
 }
 
 #header {
-    width:100%;
+    padding: 6px;
+    background: #000;
+    color: #eee;
 }
 h1 {
     font-size: 200%;
@@ -21,6 +31,7 @@ h1 {
 #nav {
     width:100%;
     border: 1px solid black;
+    border-width: 1px 0;
     height: 2em;
 }
 #breadcrumbs {
@@ -61,15 +72,16 @@ h1 {
     height:500px;
 }
 #menu {
-    clear:both;
+    position: relative;
+    clear: both;
     float: left;
     width:198px;
-    border-right:2px solid black;
+    border-right: 1px solid black;
     padding-bottom:10000px;
     margin-bottom:-10000px;
 }
 #toc {
-    margin:8px 8px 0 0;
+    margin: 0.5em 8px 0.5em 0;
 }
 #toc li {
     list-style-type: disc;
@@ -78,31 +90,38 @@ h1 {
 #backto-main,
 #goto-content {
     display:block;
-    margin: 1em 4px 0;
+    margin: 4px 4px 0;
     -moz-border-radius: 4px;
     padding: 4px;
-    border: 1px solid black;
+    border: 1px solid #999;
 }
 #backto-main:hover,
 #goto-content:hover {
-    background: #999;
+    background: #369;
     color:#fff;
+    border-color: #036;
 }
 #content {
     float: right;
-    padding: 8px;
-    width:744px;
+    width: 763px;
     padding-bottom:10000px;
-    margin-bottom:-10000px;
+    margin: -1px -1px -10000px;
+    z-index: 1;
 }
 #reader {
-    height: 500px;
+    height: 502px;
     overflow: auto;
 }
 #editor {
+    background: #f0f0ee;
+    z-index: 1;
+}
+#save {
+    margin: 4px;
 }
 #inplace {
     position: absolute;
+    z-index: 100;
 }
 #inplace form {
     position: relative;
@@ -134,6 +153,7 @@ a:hover {
     background: #9f9; 
 }
 
-.page p {
-    font-size: 70%;
+#content {
+    font-size: 90%;
 }
+

@@ -218,7 +218,7 @@
 <tr>
 <td class="first">
 <div>
-<a class="memberName" href="class_tinymce.dom.DOMUtils.html#getStyle">getStyle</a>(n:String/Element, na:String, c:String):String</div>
+<a class="memberName" href="class_tinymce.dom.DOMUtils.html#getStyle">getStyle</a>(n:String/Element, na:String, c:Boolean):String</div>
 <div class="summary">Returns the current style or runtime/computed value of a element.</div>
 </td>
 <td class="last">DOMUtils</td>
@@ -250,7 +250,7 @@
 <tr>
 <td class="first">
 <div>
-<a class="memberName" href="class_tinymce.dom.DOMUtils.html#insertAfter">insertAfter</a>(Element:Element, r:Element/String/Array):Element/Array</div>
+<a class="memberName" href="class_tinymce.dom.DOMUtils.html#insertAfter">insertAfter</a>(node:Element, reference_node:Element/String/Array):Element/Array</div>
 <div class="summary">Inserts a element after the reference element.</div>
 </td>
 <td class="last">DOMUtils</td>
@@ -306,7 +306,7 @@
 <tr class="even">
 <td class="first">
 <div>
-<a class="memberName" href="class_tinymce.dom.DOMUtils.html#remove">remove</a>(n:String/Element/Array, k:Boolean):Element/Array</div>
+<a class="memberName" href="class_tinymce.dom.DOMUtils.html#remove">remove</a>(node:String/Element/Array, keep_children:Boolean):Element/Array</div>
 <div class="summary">Removes/deletes the specified element(s) from the DOM.</div>
 </td>
 <td class="last">DOMUtils</td>
@@ -890,7 +890,7 @@ go above the point of this root node.
 <h3>getStyle<span class="memberType">method</span>
 </h3>
 <code class="syntax">public 
-						function getStyle(n:String/Element, na:String, c:String):String</code>
+						function getStyle(n:String/Element, na:String, c:Boolean):String</code>
 <div class="memberDescription">Returns the current style or runtime/computed value of a element.
 </div>
 <h4>Parameters</h4>
@@ -904,7 +904,7 @@ go above the point of this root node.
 <td class="last">Style name to return.</td>
 </tr>
 <tr>
-<td class="first">c:String</td>
+<td class="first">c:Boolean</td>
 <td class="last">Computed style.</td>
 </tr>
 </table>
@@ -968,17 +968,17 @@ go above the point of this root node.
 <h3>insertAfter<span class="memberType">method</span>
 </h3>
 <code class="syntax">public 
-						function insertAfter(Element:Element, r:Element/String/Array):Element/Array</code>
+						function insertAfter(node:Element, reference_node:Element/String/Array):Element/Array</code>
 <div class="memberDescription">Inserts a element after the reference element.
 </div>
 <h4>Parameters</h4>
 <table class="params">
 <tr>
-<td class="first">Element:Element</td>
-<td class="last">to insert after the reference.</td>
+<td class="first">node:Element</td>
+<td class="last">Element to insert after the reference.</td>
 </tr>
 <tr>
-<td class="first">r:Element/String/Array</td>
+<td class="first">reference_node:Element/String/Array</td>
 <td class="last">Reference element, element id or array of elements to insert after.</td>
 </tr>
 </table>
@@ -1095,17 +1095,17 @@ a converted value into a separate attribute with the mce prefix like _mce_src or
 <h3>remove<span class="memberType">method</span>
 </h3>
 <code class="syntax">public 
-						function remove(n:String/Element/Array, k:Boolean):Element/Array</code>
+						function remove(node:String/Element/Array, keep_children:Boolean):Element/Array</code>
 <div class="memberDescription">Removes/deletes the specified element(s) from the DOM.
 </div>
 <h4>Parameters</h4>
 <table class="params">
 <tr>
-<td class="first">n:String/Element/Array</td>
+<td class="first">node:String/Element/Array</td>
 <td class="last">ID of element or DOM element object or array containing multiple elements/ids.</td>
 </tr>
 <tr>
-<td class="first">k:Boolean</td>
+<td class="first">keep_children:Boolean</td>
 <td class="last">Optional state to keep children or not. If set to true all children will be placed at the location of the removed element.</td>
 </tr>
 </table>

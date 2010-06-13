@@ -1,8 +1,8 @@
 .paper {
     margin: 1em auto;
     border: 1px solid black;
-    width: 448px;
-    height: 460px;
+    width: 500px;
+    height: 510px;
     background: #fefefe;
     -moz-box-shadow: 5px 5px 5px #333;
     -webkit-box-shadow: 5px 5px 5px #333;
@@ -14,7 +14,7 @@
     position: relative;
     top: 14px;
     left: 14px;
-    width: 420px;
+    width: 472px;
     line-height: 1.5;
     font-size: 14px;
 }

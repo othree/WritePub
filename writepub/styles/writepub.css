@@ -72,7 +72,7 @@ h1 {
 }
 #main {
     overflow: hidden;
-    height:500px;
+    height: 540px;
 }
 #menu {
     position: relative;
@@ -112,7 +112,7 @@ h1 {
     z-index: 1;
 }
 #reader {
-    height: 502px;
+    height: 542px;
     overflow: auto;
 }
 #editor {

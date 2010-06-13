@@ -2,7 +2,7 @@
 
 (function () {
 
-    var pageHeight = 432,
+    var pageHeight = 482,
         win;
 
     function newPage (context, cb) {

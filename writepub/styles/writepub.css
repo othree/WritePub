@@ -36,14 +36,16 @@ h1 {
 }
 #toolbar {
     display: block;
-    float: right;
+    height: 2.5em;
 }
 #toolbar li {
     display: block;
     float: left;
-    padding: 0 8px 0 0;
-    height: 2em;
-    line-height: 2em;
+    padding: 0 12px;
+    height: 1.8em;
+    line-height: 1.8em;
+    margin: 6px 0px 6px 6px;
+    border: 1px solid black;
 }
 #main {
     overflow: hidden;
@@ -54,7 +56,7 @@ h1 {
     clear: both;
     float: left;
     width: 198px;
-    border-right: 1px solid black;
+    border-right: 1px solid #ccc;
     padding-bottom:10000px;
     margin-bottom:-10000px;
 }
@@ -85,11 +87,16 @@ h1 {
     padding-bottom: 10000px;
     margin: -1px -1px -10000px;
     z-index: 1;
+    background: #F0F0EE;
 }
 #reader {
     overflow: hidden;
     height: 552px;
     position: relative;
+    margin-top: 28px;
+    border: 1px solid #ccc;
+    border-width: 1px 0 0 1px;
+    background: #fff;
 }
 #editor {
     background: #f0f0ee;

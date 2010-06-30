@@ -19,8 +19,7 @@ $.extend(w, {
         toolbar: {
             read: {title: 'read'},
             zoom: {title: 'zoom'},
-            download: {title: 'download'},
-            about: {title: 'about'}
+            download: {title: 'download'}
         },
         frontMatter: {
             introduction: {title: 'introduction'},

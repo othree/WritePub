@@ -30,7 +30,7 @@ body {
 
 p {
     font-size: 14px;
-    margin-bottom: 1em;
+    margin: 0 auto 1em;
 }
 
 #reader h1, h1 {

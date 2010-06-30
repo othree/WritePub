@@ -36,7 +36,6 @@ $.extend(w, {ui: {
         if ('w' == w.options.mode) {
             w.editor.show();
             w.reader.hide();
-            //w.editor.setContent( w.reader.getContent() );
         } else {
             w.editor.hide();
             w.reader.show();
@@ -172,11 +171,11 @@ $.extend(w, {ui: {
         '</div>' +
         '<div id="nav">' +
         '    <ol id="breadcrumbs"></ol>' +
-        '    <ul id="toolbar"></ul>' +
         '    <div id="progress"></div>' +
         '</div>' +
         '<div id="main">' +
         '    <div id="menu">' +
+        '        <ul id="toolbar"></ul>' +
         '        <p><a id="backto-main" href="">'+_('back to main')+'</a></p>' +
         '        <ol id="toc"></ol>' +
         '        <p><a id="goto-content" href="">'+_('goto content')+'</a></p>' +

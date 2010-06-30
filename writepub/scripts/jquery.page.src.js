@@ -185,11 +185,21 @@
         }
     }
 
-    $.fn.page = function (customWin, newPageCB) {
+    $.fn.pageThis = function () {
         context = this[0] || this;
-        win = customWin || window;
+        win = context.ownerDocument.defaultView || context.ownerDocument.parentWindow;
+        if (win.document !== document) {
+            $(win.document).unbind('keydown', docKeyDown);
+            $(win.document).bind('keydown', docKeyDown);
+        }
+    };
+    $.fn.page = function (newPageCB) {
+        context = this[0] || this;
+        win = context.ownerDocument.defaultView || context.ownerDocument.parentWindow;
         curPage = 1;
+
         newPage(null);
+
         $(context).find('.paper, .page').each(function () {
             $(this).find('.page > *').insertBefore(this);
         }).remove().end().css('overflow', 'hidden');
@@ -214,6 +224,7 @@
     };
 
     $.fn.dePage = function () {
+        $(context).data('paged', null);
         $(this).unbind({'keydown click': reflow});
         $(document).unbind('keydown', docKeyDown);
     };

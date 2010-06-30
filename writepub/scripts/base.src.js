@@ -20,8 +20,7 @@ $.extend(w, {
             read: {title: 'read'},
             write: {title: 'write'},
             zoom: {title: 'zoom'},
-            download: {title: 'download'},
-            about: {title: 'about'}
+            download: {title: 'download'}
         },
         frontMatter: {
             introduction: {title: 'introduction'},

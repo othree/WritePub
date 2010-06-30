@@ -48,7 +48,7 @@ $.extend(w, {editor: {
         if (typeof content != 'string') { return false; }
         if (that.inited) {
             that._instance.setContent(content);
-            var reflow = $(that._instance.getDoc()).find('body').page(that._instance.getWin());
+            var reflow = $(that._instance.getDoc()).find('body').page();
             that._instance.onKeyDown.add(function (ed, e) {
                 if (!(e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18 || e.keyCode == 27 ||e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40)) {
                     setTimeout(reflow, 1);
@@ -65,11 +65,19 @@ $.extend(w, {editor: {
             }, 100);
         }
     },
+    pageThis: function () {
+        var that = this;
+        $(that._instance.getDoc()).find('body').pageThis();
+    },
     getContent: function () {
         if (!this.inited) { return false; }
         return this._instance.getContent();
     },
     show: function () {
+        var that = this;
+        if (that.inited) {
+            that.pageThis();
+        }
         $('#editor').show();
         $('#save').show();
     },

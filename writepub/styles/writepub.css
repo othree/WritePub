@@ -29,32 +29,7 @@ h1 {
     display: inline;
 }
 #nav {
-    width:100%;
-    border: 1px solid black;
-    border-width: 1px 0;
-    height: 2em;
-}
-#breadcrumbs {
-    display: block;
-    float:left;
-    height: 2em;
-    line-height: 2em;
-}
-#breadcrumbs li {
-    display: block;
-    float:left;
-    padding: 0 0 0 8px;
-    height: 2em;
-    line-height: 2em;
-}
-#breadcrumbs li:after {
-    display: block;
-    float: right;
-    padding: 0 0 0 8px;
-    content: ' > ';
-}
-#breadcrumbs li:last-of-type:after {
-    content: '';
+    display: none;
 }
 #progress {
     float: right;
@@ -72,13 +47,13 @@ h1 {
 }
 #main {
     overflow: hidden;
-    height: 540px;
+    height: 550px;
 }
 #menu {
     position: relative;
     clear: both;
     float: left;
-    width:198px;
+    width: 198px;
     border-right: 1px solid black;
     padding-bottom:10000px;
     margin-bottom:-10000px;
@@ -107,22 +82,27 @@ h1 {
 #content {
     float: right;
     width: 763px;
-    padding-bottom:10000px;
+    padding-bottom: 10000px;
     margin: -1px -1px -10000px;
     z-index: 1;
 }
 #reader {
-    height: 542px;
-    overflow: auto;
+    overflow: hidden;
+    height: 552px;
+    position: relative;
 }
 #editor {
     background: #f0f0ee;
     z-index: 1;
+    position: relative;
 }
 #save {
     margin: 4px;
     padding: 0 4px;
     line-height: 24px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
 }
 #inplace {
     position: absolute;

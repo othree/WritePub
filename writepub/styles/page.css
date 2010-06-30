@@ -1,8 +1,12 @@
+#reader {
+    overflow: hidden;
+}
+
 .paper {
-    margin: 1em auto;
+    margin: 10px auto 40px;
     border: 1px solid black;
     width: 500px;
-    height: 510px;
+    height: 500px;
     background: #fefefe;
     -moz-box-shadow: 5px 5px 5px #333;
     -webkit-box-shadow: 5px 5px 5px #333;
@@ -11,7 +15,7 @@
     position: relative;
 }
 .page {
-    position: relative;
+    position: absolute;
     top: 14px;
     left: 14px;
     width: 472px;
@@ -23,12 +27,17 @@
     font-family: 'Microsoft JhengHei', verdana, arial, sans-serif;
 }
 
-p {
-    font-size: 14px;
-    margin-bottom: 0.5em;
+body {
+    padding: 0 auto;
 }
 
-h1 {
+p {
+    font-size: 14px;
+    margin-bottom: 1em;
+}
+
+#reader h1, h1 {
+    display: block;
     font-size: 180%;
     margin: 0.5em 0;
 }

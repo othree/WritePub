@@ -2,14 +2,20 @@
 
 (function () {
 
-    var pageHeight = 482,
-        win;
+    var pageHeight = 472,
+        win,
+        context,
+        curPage = 1;
 
     function newPage (context, cb) {
-        this.count = ++this.count || 1;
-        var page = $('<div class="paper"><div class="page" id="page-'+this.count+'"></div></div>').appendTo(context).find('.page');
-        if ($.isFunction(cb)) { cb('page-'+this.count); }
-        return page;
+        if (context === null) {
+            this.count = 0;
+        } else {
+            this.count = ++this.count || 1;
+            var page = $('<div class="paper" id="page-'+this.count+'"><div class="page"></div></div>').appendTo(context).find('.page');
+            if ($.isFunction(cb)) { cb('page-'+this.count); }
+            return page;
+        }
     }
 
     function findAnchor (anchor, offset) {
@@ -152,26 +158,65 @@
         reflowPage(page, context);
     }
 
+    function pageUp() {
+        curPage--;
+        if (curPage > 0) {
+           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-5}, 300 );
+        } else {
+            curPage = 1;
+        }
+    }
+    function pageDown() {
+        curPage++;
+        console.log(curPage);
+        if ($('#page-'+curPage, context).length == 1) {
+           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-5}, 300 );
+        } else {
+            curPage--;
+        }
+    }
+
+    function docKeyDown(e) {
+        if (e.keyCode == 33) {
+            pageUp();
+            return false;
+        } else if (e.keyCode == 34) {
+            pageDown();
+            return false;
+        }
+    }
+
     $.fn.page = function (customWin, newPageCB) {
-        var that = this[0] || this;
+        context = this[0] || this;
         win = customWin || window;
-        $(that).find('.paper, .page').each(function () {
+        curPage = 1;
+        newPage(null);
+        $(context).find('.paper, .page').each(function () {
             $(this).find('.page > *').insertBefore(this);
-        }).remove();
-        $('> *', that).each(function () {
+        }).remove().end().css('overflow', 'hidden');
+        $('> *', context).each(function () {
             var elem = this;
-            addContent($(elem), that, newPageCB);
+            addContent($(elem), context, newPageCB);
         });
-        //$(that).bind({'keypress click': function () {
-            //reflow(that);
+        //$(context).bind({'keypress click': function () {
+            //reflow(context);
         //}});
+        
+        if (win.document !== document) {
+            $(win.document).unbind('keydown', docKeyDown);
+            $(win.document).bind('keydown', docKeyDown);
+        }
+        $(document).unbind('keydown', docKeyDown);
+        $(document).bind('keydown', docKeyDown);
+
         return function () {
-            reflow(that);
+            reflow(context);
         };
     };
 
     $.fn.dePage = function () {
         $(this).unbind({'keydown click': reflow});
+        $(document).unbind('keydown', docKeyDown);
     };
 
 

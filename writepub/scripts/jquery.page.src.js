@@ -161,16 +161,15 @@
     function pageUp() {
         curPage--;
         if (curPage > 0) {
-           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-5}, 300 );
+           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-10}, 300 );
         } else {
             curPage = 1;
         }
     }
     function pageDown() {
         curPage++;
-        console.log(curPage);
         if ($('#page-'+curPage, context).length == 1) {
-           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-5}, 300 );
+           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-10}, 300 );
         } else {
             curPage--;
         }

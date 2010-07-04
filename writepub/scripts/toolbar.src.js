@@ -37,6 +37,8 @@ $.extend(w, {toolbar: {
         w.toolbar.bar.find('#toolbar-read').show();
     },
     zoom: function() {
+        $('#zoom-back').remove();
+        $(window).resize(w.toolbar.zoom);
         $('#content').addClass('zoom');
         var wr = $(window).width()/520,
             hr = $(window).height()/545,
@@ -59,6 +61,7 @@ $.extend(w, {toolbar: {
             $('#content').removeClass('zoom');
             $('#reader, #editor iframe').css({zoom: '1', width: '100%', '-moz-transform': '', '-webkit-transform': '', 'margin-left': 0});
             $('#editor').css('height', eh);
+            $(window).unbind('resize', w.toolbar.zoom);
             $(this).remove();
             return false;
         });

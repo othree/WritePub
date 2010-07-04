@@ -1,6 +1,7 @@
 html, body {
     font-family: 'Microsoft JhengHei', verdana, arial, sans-serif;
     background-image: url('../images/bg.png');
+    padding: 0;
 }
 
 body {

@@ -1,8 +1,8 @@
 /*global lang*/
 
 lang = {
-    'back to main': '回到主頁',
-    'goto content': '直接進入內文',
+    'back to main': '本書資料',
+    'goto content': '正文',
     'read': '閱讀',
     'write': '編輯',
     'zoom': '縮放',

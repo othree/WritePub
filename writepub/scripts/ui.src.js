@@ -15,6 +15,7 @@ $.extend(w, {ui: {
         w.ui.updateHeader();
         w.toolbar.init(w.ui.toolbar(w.meta.toolbar));
         w.ui.frontMatter();
+        w.ui.toc();
         w.ui.breadcrumbs(w.options.defaults.crumbs);
         w.inplace.init();
         w.ui.inplaceInit();
@@ -30,7 +31,7 @@ $.extend(w, {ui: {
         w.ui.breadEvent();
         w.ui.tocEvent();
         w.ui.goContentEvent();
-        $('#backto-main').parent().hide();
+        $('#toc').hide();
     },
     switchViewport: function() {
         if ('w' == w.options.mode) {
@@ -61,7 +62,7 @@ $.extend(w, {ui: {
             }
             if (id !== false) {
                 if (id == 'mainpage') {
-                    $('#backto-main').click();
+                    $('#goto-frontMatter').click();
                 } else {
                     w.load(id);
                 }
@@ -78,7 +79,7 @@ $.extend(w, {ui: {
     },
     frontMatter: function() {
         if (!w.ui.inited) { return false; }
-        w.ui.fillList($('#toc'), w.meta.frontMatter, 'front');
+        w.ui.fillList($('#frontMatter'), w.meta.frontMatter, 'front');
     },
     inplaceInit: function() {
         $.fn.yellow = function () {
@@ -128,18 +129,16 @@ $.extend(w, {ui: {
     goContentEvent: function () {
         if (!w.ui.inited) { return false; }
         $('#goto-content').click(function (e) {
-            w.ui.toc();
-            $('#goto-content').parent().hide();
-            $('#backto-main').parent().show();
+            $('#frontMatter').hide();
+            $('#toc').show();
             w.load('ch1');
             e.stopPropagation();
             e.preventDefault();
             return false;
         });
-        $('#backto-main').click(function (e) {
-            w.ui.frontMatter();
-            $('#goto-content').parent().show();
-            $('#backto-main').parent().hide();
+        $('#goto-frontMatter').click(function (e) {
+            $('#toc').hide();
+            $('#frontMatter').show();
             w.load('introduction');
             e.stopPropagation();
             e.preventDefault();
@@ -176,9 +175,11 @@ $.extend(w, {ui: {
         '<div id="main">' +
         '    <div id="menu">' +
         '        <ul id="toolbar"></ul>' +
-        '        <p><a id="backto-main" href="">'+_('back to main')+'</a></p>' +
-        '        <ol id="toc"></ol>' +
+        '        <p><a id="goto-frontMatter" href="">'+_('back to main')+'</a></p>' +
+        '        <ol id="frontMatter"></ol>' +
         '        <p><a id="goto-content" href="">'+_('goto content')+'</a></p>' +
+        '        <ol id="toc"></ol>' +
+        '        <div id="powered">Powered by <br>殺青編輯器</div>' +
         '    </div>' +
         '    <div id="content">' +
         '        <div id="editor"><textarea id="editor-area"></textarea></div>' +

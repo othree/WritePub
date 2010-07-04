@@ -36,16 +36,54 @@ h1 {
 }
 #toolbar {
     display: block;
-    height: 2.5em;
+    height: 27px;
+    background: #F0F0EE;
+    border-bottom: 1px solid #ccc;
 }
 #toolbar li {
     display: block;
     float: left;
+    height: 27px;
+    line-height: 27px;
+}
+#toolbar li a {
     padding: 0 12px;
-    height: 1.8em;
-    line-height: 1.8em;
-    margin: 6px 0px 6px 6px;
-    border: 1px solid black;
+    display: block;
+    color: #000;
+    text-decoration: none;
+    border-right: 1px solid #ccc;
+}
+#toolbar li a:hover {
+    color: #000;
+    background: #B2BBD0;
+    border: 1px solid #000;
+    border-width: 0 1px 1px;
+    margin-left: -1px;
+}
+#zoom-back {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    color: #000;
+    background: #F0F0EE;
+    border: 1px solid #ccc;
+    border-width: 0 1px 1px 0;
+    padding: 4px 12px;
+    text-decoration: none;
+}
+#zoom-back:hover {
+    background: #B2BBD0;
+    border-color: #000;
+}
+#zoom-back.w {
+    top: 29px;
+}
+#powered {
+    margin: 0.5em 4px;
+    padding-left: 55px;
+    border-top: 1px solid black;
+    font-size: 90%;
 }
 #main {
     overflow: hidden;
@@ -60,14 +98,19 @@ h1 {
     padding-bottom:10000px;
     margin-bottom:-10000px;
 }
+#menu p {
+    margin-bottom: 0;
+}
+#frontMatter,
 #toc {
     margin: 0.5em 8px 0.5em 0;
 }
+#frontMatter li,
 #toc li {
     list-style-type: disc;
     margin-left: 1.5em;
 }
-#backto-main,
+#goto-frontMatter,
 #goto-content {
     display:block;
     margin: 4px 4px 0;
@@ -88,6 +131,19 @@ h1 {
     margin: -1px -1px -10000px;
     z-index: 1;
     background: #F0F0EE;
+}
+#content.zoom {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+#content.zoom #reader {
+    margin-top: 0;
 }
 #reader {
     overflow: hidden;
@@ -134,11 +190,13 @@ a:hover {
     color: red;  
 }
 
+#frontMatter a,
 #toc a {
     border: 2px solid transparent;
     padding: 2px;
     background: transparent; 
 }
+#frontMatter a.selected,
 #toc a.selected {
     border: 2px solid #6a6;
     padding: 2px;

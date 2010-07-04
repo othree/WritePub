@@ -36,6 +36,34 @@ $.extend(w, {toolbar: {
         w.toolbar.bar.find('#toolbar-write').hide();
         w.toolbar.bar.find('#toolbar-read').show();
     },
+    zoom: function() {
+        $('#content').addClass('zoom');
+        var wr = $(window).width()/520,
+            hr = $(window).height()/545,
+            r  = wr > hr ? hr : wr,
+            tranX = ($(window).width()*(1-1/r))/2,
+            tranY = ($(window).height()*(1-1/r))/2,
+            eh = $('#editor').css('height');
+        $('#reader, #editor iframe').css({'zoom': r});
+        if ($.browser.mozilla) {
+            $('#reader, #editor iframe').css({'width': $(window).width()/r+'px', 'height': $(window).height()/r+'px', '-moz-transform': 'translate('+tranX+'px, '+tranY+'px) scale('+r+')'});
+            $('#editor').css('height', '100%');
+        } else if ($.browser.webkit) {
+            $('#editor iframe').css({'width': $(window).width()/r+'px', 'height': $(window).height()/r+'px', '-webkit-transform': 'translate(0px, '+tranY+'px) scale('+r+')'});
+            $('#editor').css('height', '100%');
+        }
+        var back = $('<a id="zoom-back" href="">'+_('zoom')+'</a>').click(function () {
+            $('#content').removeClass('zoom');
+            $('#reader, #editor iframe').css({zoom: '1', width: '100%', '-moz-transform': '', '-webkit-transform': ''});
+            $('#editor').css('height', eh);
+            $(this).remove();
+            return false;
+        });
+        if (w.options.mode == 'w') {
+            back.addClass('w');
+        }
+        $('body').append(back);
+    },
     bar: null
 }});
 

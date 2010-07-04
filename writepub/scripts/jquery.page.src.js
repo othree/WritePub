@@ -140,12 +140,14 @@
 
     function reflow (context) {
         setTimeout(function () {
-            var anchor = $(win.getSelection().anchorNode);
-            var page = anchor.parents('.page');
-            $(context).find('.paper .paper').each(function () {
-                $(this).find('.page > *').insertBefore(this);
-            }).remove();
-            reflowPage(page, context);
+            if (win.getSelection) {
+                var anchor = $(win.getSelection().anchorNode);
+                var page = anchor.parents('.page');
+                $(context).find('.paper .paper').each(function () {
+                    $(this).find('.page > *').insertBefore(this);
+                }).remove();
+                reflowPage(page, context);
+            }
         }, 1);
     }
 
@@ -161,7 +163,8 @@
     function pageUp() {
         curPage--;
         if (curPage > 0) {
-           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-10}, 300 );
+           $(context).add(context.ownerDocument.documentElement).
+               animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-10}, 300 );
         } else {
             curPage = 1;
         }
@@ -169,7 +172,8 @@
     function pageDown() {
         curPage++;
         if ($('#page-'+curPage, context).length == 1) {
-           $(context).animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-10}, 300 );
+           $(context).add(context.ownerDocument.documentElement).
+               animate({'scrollTop': $('#page-'+curPage, context).attr('offsetTop')-10}, 300 );
         } else {
             curPage--;
         }

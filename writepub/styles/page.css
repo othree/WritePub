@@ -23,7 +23,9 @@
 * {
     font-family: 'Microsoft JhengHei', verdana, arial, sans-serif;
 }
-
+html {
+    overflow: hidden;
+}
 body {
     padding: 0 auto;
 }

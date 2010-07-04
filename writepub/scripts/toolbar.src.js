@@ -51,10 +51,13 @@ $.extend(w, {toolbar: {
         } else if ($.browser.webkit) {
             $('#editor iframe').css({'width': $(window).width()/r+'px', 'height': $(window).height()/r+'px', '-webkit-transform': 'translate(0px, '+tranY+'px) scale('+r+')'});
             $('#editor').css('height', '100%');
+        } else if ($.browser.msie) {
+            $('#editor iframe').css({'width': $(window).width()/r+'px', 'height': $(window).height()/r+'px', 'margin-left': -tranX});
+            $('#editor').css('height', '100%');
         }
         var back = $('<a id="zoom-back" href="">'+_('zoom')+'</a>').click(function () {
             $('#content').removeClass('zoom');
-            $('#reader, #editor iframe').css({zoom: '1', width: '100%', '-moz-transform': '', '-webkit-transform': ''});
+            $('#reader, #editor iframe').css({zoom: '1', width: '100%', '-moz-transform': '', '-webkit-transform': '', 'margin-left': 0});
             $('#editor').css('height', eh);
             $(this).remove();
             return false;

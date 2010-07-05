@@ -29,7 +29,7 @@ $.extend(w, {ui: {
         }
 
         w.ui.breadEvent();
-        w.ui.tocEvent();
+        w.ui.menuEvent();
         w.ui.goContentEvent();
         $('#toc').hide();
     },
@@ -111,8 +111,8 @@ $.extend(w, {ui: {
         if (!w.ui.inited) { return false; }
         $('#toc').html(w.toc.html());
     },
-    tocEvent: function() {
-        $('#toc').click(function (e) {
+    menuEvent: function() {
+        $('#toc, #frontMatter').click(function (e) {
             var uri = $(e.target).attr('href'),
                 id = w.idExist($(e.target).attr('id'));
             if (id === false) {

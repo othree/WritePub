@@ -24,22 +24,26 @@
     font-family: 'Microsoft JhengHei', verdana, arial, sans-serif;
 }
 html {
-    overflow: hidden;
+    overflow: hidden \9; //IE only, will make scrollTop disable in Firefox
     padding-bottom: 100000px;
 }
 body {
+    overflow: hidden; //IE only
     padding: 0 auto;
 }
 
 p {
     font-size: 14px;
     margin: 0 auto 1em;
+    padding: 0;
+    letter-spacing: 1px;
 }
 
 #reader h1, h1 {
     display: block;
     font-size: 180%;
     margin: 0.5em 0;
+    padding: 0;
 }
 
 h2 {
